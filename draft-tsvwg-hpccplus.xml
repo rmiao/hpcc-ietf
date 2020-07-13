@@ -2,6 +2,7 @@
 <!DOCTYPE rfc SYSTEM "rfc2629.dtd" [
 <!ENTITY rfc2119 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml">
 <!ENTITY rfc8174 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8174.xml">
+<!ENTITY INT "inband telemetry">
 <!ENTITY I-D.ietf-avtcore-cc-feedback-message SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-avtcore-cc-feedback-message.xml">
 ]>
 <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
@@ -63,7 +64,7 @@
     </author>
 
 
-    <author fullname="Jeongkeun Lee" initials="JK" surname="Lee">
+    <author fullname="Jeongkeun Lee" initials="J" surname="Lee">
       <organization abbrev="Intel Corporation">Intel, Corp.</organization>
 
       <address>
@@ -93,6 +94,39 @@
         <email>chang.kim@intel.com</email>
       </address>
     </author>
+
+    <author fullname="Barak Gafni" initials="B. " surname="Gafni">
+      <organization>Mellanox Technologies, Inc.</organization>
+      <address>
+        <postal>
+          <street>350 Oakmead Parkway, Suite 100</street>
+          <city>Sunnyvale</city>
+          <region>CA</region>
+          <code>94085</code>
+          <country>USA</country>
+        </postal>
+
+        <email>gbarak@mellanox.com</email>
+      </address>
+    </author>
+
+    <author fullname="Yuval Shpigelman" initials="Y. " surname="Shpigelman">
+      <organization>Mellanox Technologies, Inc.</organization>
+      <address>
+        <postal>
+          <street>Haim Hazaz 3A</street>
+          <city>Netanya</city>
+          <region></region>
+          <code>4247417</code>
+          <country>Israel</country>
+        </postal>
+
+        <email>yuvals@nvidia.com</email>
+      </address>
+    </author>
+
+
+
 
 <!--
     <author fullname="Paul E. Jones" initials="P. E." surname="Jones">
@@ -163,13 +197,12 @@ However, the existing high-speed CC schemes have inherent limitations for reachi
     <t>In this document, we describe
 HPCC++ (High Precision Congestion Control), a new high-speed CC
 mechanism which achieves the three goals simultaneously. HPCC++
-leverages in-network telemetry (INT) to obtain precise link load
+leverages inband telemetry to obtain precise link load
 information and controls traffic precisely. By addressing challenges
-such as delayed INT information during congestion and overreaction to INT information, HPCC++ can quickly 
+such as delayed &INT; information during congestion and overreaction to &INT; information, HPCC++ can quickly 
 converge to utilize free bandwidth while avoiding congestion, and can maintain near-zero
 in-network queues for ultra-low latency. HPCC++ is also fair and
-easy to deploy in hardware, implementable with commodity
-programmable NICs and switches.</t>
+easy to deploy in hardware, implementable with commodity NICs and switches.</t>
    </abstract>
    
    </front>
@@ -187,22 +220,22 @@ programmable NICs and switches.</t>
       can no longer sustain the critical latency and bandwidth requirements <xref target="Zhu-SIGCOMM2015"> </xref>, 
       offloading network stacks into hardware is an inevitable
       direction in high-speed networks. 
-      large-scale networks with RDMA (remote direct memory access)
+      Large-scale networks with RDMA (remote direct memory access)
       over Converged Ethernet Version 2 (RoCEv2) 
-      often becomes hardware-offloading solution.
-      Unfortunately, the RDMA networks still face fundamental challenges
+      often uses hardware-offloading solutions.
+      In some cases, the RDMA networks still face fundamental challenges
       to reconcile low latency, high bandwidth utilization, and high stability.</t>
 
     <t>This document describes a new CC mechanism, HPCC++ (Enhanced High Precision Congestion Control), 
       for large-scale, high-speed networks. The key idea behind HPCC++ is to leverage the precise link load 
-      information from INT to compute accurate flow rate updates. Unlike
+      information from &INT; to compute accurate flow rate updates. Unlike
       existing approaches that often require a large number of iterations
       to find the proper flow rates, HPCC++ requires only one rate update
-      step in most cases. Using precise information from INT enables
-      HPCC++ to address the three limitations in current CC schemes. First,
+      step in most cases. Using precise information from &INT; enables
+      HPCC++ to address the limitations in current CC schemes. First,
       HPCC++ senders can quickly ramp up flow rates for high utilization
-      or ramp down flow rates for congestion avoidance. Second, HPCC++
-      senders can quickly adjust the flow rates to keep each link's input rate slightly lower than 
+      and ramp down flow rates for congestion avoidance. Second, HPCC++
+      senders can quickly adjust the flow rates to keep each link's output rate slightly lower than 
       the link's capacity, preventing queues from being built-up as well as preserving 
       high link utilization. Finally, since sending rates are computed precisely based on direct
       measurements at switches, HPCC++ requires merely three independent
@@ -210,13 +243,13 @@ programmable NICs and switches.</t>
 
       <t>The base form of HPCC++ is the original HPCC algorithm and its full description can be found 
       in <xref target="SIGCOMM-HPCC"></xref>. While the original design lays the foundation 
-      for INT-based precision congestion control, 
+      for &INT; based precision congestion control, 
       HPCC++ is an enhanced version which takes into account system constraints and aims to reduce the design 
       overhead and further improves the performance. <xref target = "sec-implementation"></xref> describes these
       detailed proposed design enhancements and guidelines. </t>
 
 
-<!--     <t>While the originall HPCC design lays the foundation for INT-based precision congestion control, 
+<!--     <t>While the originall HPCC design lays the foundation for &INT;-based precision congestion control, 
       HPCC++ is an enhanced version which takes into account system constraints and aims to reduce the design 
       overhead and further improves the performance. <xref target = "sec-implementation"></xref> describes these
       detailed proposed changes. </t> -->
@@ -239,17 +272,17 @@ programmable NICs and switches.</t>
 
       <t><xref target="fig-system-overview"></xref> shows the end-to-end
       system that HPCC++ operates in. During
-      the propagation of the packet from the sender to the receiver, each
-      switch along the path leverages the INT feature of its switching
-      ASIC to insert some meta-data that reports the current load of the
+      the traverse of the packet from the sender to the receiver, each
+      switch along the path inserts &INT; that reports the current state of the
       packet's egress port, including timestamp (ts), queue length (qLen),
-      transmitted bytes (txBytes), and the link bandwidth capacity (B).
-      When the receiver gets the packet, it can copies all the meta-data
-      recorded by the switches to the ACK message it sends back to the
+      transmitted bytes (txBytes), and the link bandwidth capacity (B), 
+      together with switch_ID and port_ID.
+      When the receiver gets the packet, it may copy all the &INT;
+      recorded from the network to the ACK message it sends back to the
       sender, and then the sender decides how to adjust its flow rate each time it
       receives an ACK with network load information. Alternatively, the receiver
-      can calculate the flow rate based on the INT information and 
-      feedback the calculated rate back to the sender. The nofication packets would 
+      may calculate the flow rate based on the &INT; information and 
+      feedback the calculated rate back to the sender. The notification packets would 
       include delayed ack information as well. </t>
 
 
@@ -278,26 +311,26 @@ programmable NICs and switches.</t>
   <t><list style="symbols">
 	<t>Data sender: responsible for controlling inflight bytes. HPCC++ is a window-based CC scheme that 
         controls the number of inflight bytes. The inflight bytes mean the amount 
-	of data that have been sent, but not acknowledged at the sender yet.
+	      of data that have been sent, but not acknowledged at the sender yet.
         Controlling inflight bytes has an important advantage compared
         to controlling rates. In the absence of congestion, the inflight bytes
         and rate are interchangeable with equation inflight = rate * T
         where T is the base propagation RTT. The rate can be calculated locally 
-	or obtained from the notification packet.</t>
+	      or obtained from the notification packet. 
+        The sender may further use the data pacing mechanism in hardware to limit the rate accordingly.
+  </t>
 
-	<t> Network nodes: responsible of inserting the INT information 
-        to the data packet. The INT information reports the current load of the
+	<t> Network nodes: responsible of inserting the &INT; information 
+        to the data packet. The &INT; information reports the current load of the
         packet's egress port, including timestamp (ts), queue length (qLen),
-	transmitted bytes (txBytes), and the link bandwidth capacity (B).
-	Note that the INT information can be nested with each network node adds its own
-        information or more capable network nodes may compare its INT information against
-	the one in the packet header. If its congestion is more severe, 
-        the node may replace the packet's INT information with its own.</t>
+	      transmitted bytes (txBytes), and the link bandwidth capacity (B).
+        Besides, the &INT; contains switch_ID and port_ID to identify a link.
+ </t>
 
-	<t> Data receiver: responsible for either reflecting back the INT information 
-	in the data packet using ACKs or calculating the proper flow
-        rate based on network congestion information in INT and sending notification packets
-        back to the sender. </t>
+	<t> Data receiver: responsible for either reflecting back the &INT; information 
+	    in the data packet or calculating the proper flow
+      rate based on network congestion information in &INT; and sending notification packets
+      back to the sender. </t>
 
   </list></t>
 
@@ -423,7 +456,7 @@ the sequence number in the incoming ACK should be larger than
 lastUpdateSeq to trigger a new sync betweenW c
 andW (Line 14-15
 and 18-19). The sender also remembers the pacing rate and current
-INT information at Line 27. The sender computes a new window
+&INT; information at Line 27. The sender computes a new window
 size W at Line 23 or Line 26, depending on whether to update W c
 ,
 with function MeasureInflight and ComputeWind.
@@ -469,12 +502,12 @@ Note that none of the three
 parameters are reliability-critical. </t>
 
 <t>
-HPCC++'s design intentionally brings advantages to short-lived flows, by allowing 
+HPCC++'s design brings advantages to short-lived flows, by allowing 
 flows starting at line-rate and the separation of utilization convergence and fairness convergence. HPCC++ 
 achieves fast utilization convergence to mitigate congestion in almost
 one round-trip time, while allows flows to gradually converge to fairness. 
-This design choice is especially helpful for the workload
- of datacenter applications, where the majority of flows are short and latency-sensitive.
+This design feature of HPCC++ is especially helpful for the workload
+ of datacenter applications, where flows are usually short and latency-sensitive.
 
 Normally we set a very small W_ai to support
 a large number of concurrent flows on a link, because slower fairness 
@@ -498,16 +531,16 @@ but just cannot maintain zero queues.
 	 title = "Design Enhancement and Implementation">
 
 <t>
-The basic design of HPCC++, i.e. HPCC, as described above is to add INT information
-into every date packet to response congestion as soon as the very first packet
+The basic design of HPCC++, i.e. HPCC, as described above is to add &INT; information
+into every data packet to response congestion as soon as the very first packet
 observing the network congestion. This is especially helpful to reduce the risk
 of severe congestion in incast scenario at the first round-trip time. In addition, 
-original HPCC's algorithm of introducing Wc is for the purpose of solving 
+original HPCC's algorithm introduction of Wc is for the purpose of solving 
 the over-reaction issue from using this per-packet response. </t>
 
 
-<t>Alternatively, the INT information needs not to be added to every data packet to reduce
-the overhead. Switches can generate INT less frequently, e.g., once per RTT or upon 
+<t>Alternatively, the &INT; information needs not to be added to every data packet to reduce
+the overhead. Switches can generate &INT; less frequently, e.g., once per RTT or upon 
 congestion happening. </t> 
 
 <section anchor = "sec-guideline"
@@ -524,21 +557,21 @@ guidelines for different implementations:</t>
      incorporate mechanisms to speed up the fairness convergence. </t>
 
 
-  <t>The switch should capture INT information that includes link load (txBytes, ts, qlen) and 
-     link spec (switch ID, egress port ID, port speed) at the egress port.
+  <t>The switch should capture &INT; information that includes link load (txBytes, qlen, ts) and 
+     link spec (switch_ID, port_ID, B) at the egress port.
      Note, each switch should record all those information at the single snapshot to achieve a precise link load
      estimate.</t>
 
-  <t> HPCC++ can optionally use a probe packet to query the INT information. Thereby, the probe packets should take the same routing path and QoS queueing with the data packets. </t>
+  <t> HPCC++ can use a probe packet to query the &INT; information. Thereby, the probe packets should take the same routing path and QoS queueing with the data packets. </t>
 
      </list> </t>
 
 <t> As long the above guidelines are met, this document does not
-   mandate a particular INT header format or encapsulation,
+   mandate a particular &INT; header format or encapsulation,
    which are orthogonal to the HPCC++ algorithms
    described in this document. The algorithm can be implemented with a choice
-   of in-band network telemetry <xref target="P4-INT"></xref>, <xref target="I-D.ietf-ippm-ioam-data"></xref>,
-<xref target="I-D.ietf-kumar-ippm-ifa"></xref>.
+   of inband telemetry protocols, such as in-band network telemetry <xref target="P4-INT"></xref>, IOAM <xref target="I-D.ietf-ippm-ioam-data"></xref>,
+  IFA <xref target="I-D.ietf-kumar-ippm-ifa"></xref> and others.
  </t>
 
 </section>
@@ -554,10 +587,10 @@ updating Wc.</t> -->
 Note that the window/rate calculation can be implemented at
 either the data sender or the data receiver. 
 If the ACK packets already 
-exist for reliability purpose, the INT information can be echoed back to
-the sender via ACK self-clocking. Not all ACK packets need to carry the INT information. 
+exist for reliability purpose, the &INT; information can be echoed back to
+the sender via ACK self-clocking. Not all ACK packets need to carry the &INT; information. 
 To reduce the Packet Per Second (PPS) overhead,
-the receiver may examine the INT information and adopt the technique of 
+the receiver may examine the &INT; information and adopt the technique of 
 delayed ACKs that only sends out an ACK for a few of received packets. 
 In order to reduce PPS even further, one may implement the algorithm at the receiver and
 feedback the calculated window in the ACK packet once every RTT. 
@@ -565,7 +598,7 @@ feedback the calculated window in the ACK packet once every RTT.
 
 <t>
 The receiver-based algorithm, Rx-HPCC, 
-is based on int.L, which is the INT information in the packet header. The receiver
+is based on int.L, which is the &INT; information in the packet header. The receiver
 performs the same functions except using int.L instead of ack.L. The new function NewINT(int.L)
 is to replace NewACK(int.L)
 </t>
@@ -601,27 +634,27 @@ under heavy load.
 <section anchor = "subsec-int"
 	       title = "Switch-side Optimizations">
 <t>
-Switches can potentially generate and send separate packets containing INT information
-(aka INT response packets) directly back to the data senders so that they can slow 
+Switches can potentially generate and send separate packets containing &INT; information
+(aka &INT; response packets) directly back to the data senders so that they can slow 
 down as soon as possible. 
 This fast feedback and reaction can further reduce buffer size consumption upon
 heavy incast. Switches can consider the level of congestion to decide when to trigger
-direct INT responses. A simple bloom-filter and timer can be used at switches to
-avoid sending a burst of INT responses to the same sender.
-An INT response packet must carry the sequence number of the original data packet,
-so that the sender can correctly correlate the INT response with the data packet
-triggered the INT response.
+direct &INT; responses. A simple bloom-filter and timer can be used at switches to
+avoid sending a burst of &INT; responses to the same sender.
+An &INT; response packet must carry the sequence number of the original data packet,
+so that the sender can correctly correlate the &INT; response with the data packet
+triggered the &INT; response.
 </t>
 
 
 <t>
-One may optimize the INT header overhead by implementing a simple subscription-based INT.
-The data senders may simply use a different DSCP codepoint or a flag bit in the INT instruction header
-to indicate INT subscription. (We expect future INT specs to support such a subscription service.) 
-The senders can selectively subscribe to INT on a per-packet basis to control the INT data overhead.
-While forwarding INT-subscribed data packets, the switches can monitor the level of congestion and
-conditionally generate separate INT responses as described above. 
-The INT responses can be directly sent back to the senders
+One may optimize the &INT; header overhead by implementing a simple subscription-based &INT;.
+The data senders may use a different DSCP codepoint or a flag bit in the &INT; instruction header
+to indicate &INT; subscription. (We expect future &INT; specs to support such a subscription service.) 
+The senders can selectively subscribe to &INT; on a per-packet basis to control the &INT; data overhead.
+While forwarding &INT;-subscribed data packets, the switches can monitor the level of congestion and
+conditionally generate separate &INT; responses as described above. 
+The &INT; responses can be directly sent back to the senders
 or to the receivers depending on which version of HPCC++ algorithm (sender-based or receiver-based)
 is used in the network.
 </t>
@@ -634,8 +667,7 @@ is used in the network.
 
 <t>A prototype of HPCC++ in commodity NICs with FPGA
 programmability is implemented to realize the CC algorithm and commodity
-switching ASICs with P4 programmability to realize a standard
-INT feature. </t>
+switching ASICs to realize &INT; feature. </t>
 
     <t><figure anchor="fig-nic"
                title="Overview of NIC Implementation">
@@ -673,19 +705,19 @@ INT feature. </t>
           </figure></t>
 
 <section anchor = "sec-implementation-header"
-	 title ="INT padding at switches">
+	 title ="&INT; padding at switches">
 
 <t>HPCC++ only relies on packets to share information across senders,
-receivers, and switches. HPCC++ is open to a variety of INT format standards.
+receivers, and switches. HPCC++ is open to a variety of &INT; format standards.
 Inside a data center, the path length is often no more than 5 hops.
-The overhead of the INT padding for HPCC++ is low. </t>
+The overhead of the &INT; padding for HPCC++ is low. </t>
 
 
 </section>
 
 <section anchor = "sec-implementation-nic"
 	 title ="Congestion control at NICs">
-<t><xref target="fig-nic"> </xref> shows HPCC++ implementation on a commodity programmable
+<t><xref target="fig-nic"> </xref> shows HPCC++ implementation on a commodity
 NIC. The NIC provides an FPGA chip which is connected to the
 main memory with a vendor-provided PCIe module and the Ethernet adapter 
 with a vendor-provided MAC module. Sitting between
@@ -742,7 +774,7 @@ verbs as future work. </t>
 	 title = "Security Considerations">
 
    <t>The rate adaptation mechanism in HPCC++ relies on feedback
-    from the data receiver. As such, it is vulnerable to attacks where
+    from the network. As such, it is vulnerable to attacks where
     feedback messages are hijacked, replaced, or intentionally
     injected with misleading information resulting in denial of
     service, similar to those that can affect TCP. It is therefore
