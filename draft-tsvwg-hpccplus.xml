@@ -10,7 +10,7 @@
 <?rfc compact="yes" ?>
 <?rfc symrefs="yes" ?>
 <rfc category="exp" 
-     docName="draft-pan-tsvwg-hpccplus-00"
+     docName="draft-pan-tsvwg-hpccplus-01"
      ipr="trust200902">
   <!-- What is the category field value-->
 
@@ -297,11 +297,11 @@ easy to deploy in hardware, implementable with commodity NICs and switches.</t>
 
 
     <t><figure anchor="fig-system-overview"
-               title="System Overview">
+               title="System Overview (tlm=inband telemtry)">
     <artwork><![CDATA[
 
                              
-  +---------+  pkt    +-------+ pkt+int +-------+ pkt+int +----------+
+  +---------+  pkt    +-------+ pkt+tlm +-------+ pkt+tlm +----------+
   |  Data   |-------->|       |-------->|       |-------->| Data     |
   |  Sender |=========|Switch1|=========|Switch2|=========| Receiver |  
   +---------+ Link-0  +-------+  Link-1 +-------+  Link-2 +----------+
@@ -411,45 +411,45 @@ applications or based on theoretical and simulation studies.</t>
 <t>The HPCC++ algorithm can be outlined as below:</t>
     
 <t><figure><artwork><![CDATA[
-1:    Function MeasureInflight(ack)
+1: Function MeasureInflight(ack)
 2:    u = 0;
 3:    for each link i on the path do
-4:              ack.L[i].txBytes-L[i].txBytes
-      txRate =  ----------------------------- ;
-                    ack.L[i].ts-L[i].ts 
-5:          min(ack.L[i].qlen,L[i].qlen)      txRate
-      u' = ----------------------------- +  ---------- ;
-                ack.L[i].B*T                ack.L[i].B
-6:    if u' > u then
-7:       u = u'; tau = ack.L[i].ts -  L[i].ts;
-8:    tau = min(tau, T);
-9:    U = (1 - tau/T)*U + tau/T*u;
-10:   return U; 
+4:                  ack.L[i].txBytes-L[i].txBytes
+          txRate =  ----------------------------- ;
+                         ack.L[i].ts-L[i].ts 
+5:               min(ack.L[i].qlen,L[i].qlen)      txRate
+           u' = ----------------------------- +  ---------- ;
+                     ack.L[i].B*T                ack.L[i].B
+6:         if u' > u then
+7:             u = u'; tau = ack.L[i].ts -  L[i].ts;
+8:     tau = min(tau, T);
+9:     U = (1 - tau/T)*U + tau/T*u;
+10:    return U; 
 ]]></artwork></figure></t>
 
 <t><figure><artwork><![CDATA[
-11:   Function ComputeWind(U, updateWc)
-12:   if U >= eta or incStage >= maxStagee then
-13:           Wc
-         W = ----- + W_ai;
-             U/eta
-14:   if updateWc then
-15:      incStagee = 0; Wc = W ;
-16:   else
-17:      W = Wc + W_ai ;
-18:      if updateWc then
-19:         incStage++; Wc = W ;
-20:   return W
+11: Function ComputeWind(U, updateWc)
+12:    if U >= eta or incStage >= maxStagee then
+13:             Wc
+           W = ----- + W_ai;
+               U/eta
+14:    if updateWc then
+15:        incStagee = 0; Wc = W ;
+16:    else
+17:        W = Wc + W_ai ;
+18:        if updateWc then
+19:            incStage++; Wc = W ;
+20:    return W
 ]]></artwork></figure></t>
 
 <t><figure><artwork><![CDATA[
-21:   Procedure NewAck(ack)
-22:   if ack.seq > lastUpdateSeq then
-23:      W = ComputeWind(MeasureInflight(ack), True);
-24:      lastUpdateSeq = snd_nxt;
-25:   else
-26:      W = ComputeWind(MeasureInflight(ack), False);
-27:   R = W/T; L = ack.L;
+21: Procedure NewAck(ack)
+22:    if ack.seq > lastUpdateSeq then
+23:        W = ComputeWind(MeasureInflight(ack), True);
+24:        lastUpdateSeq = snd_nxt;
+25:    else
+26:        W = ComputeWind(MeasureInflight(ack), False);
+27:    R = W/T; L = ack.L;
 ]]></artwork></figure></t>
 
 <t>The above illustrates the overall process of CC at the sender side for
@@ -530,6 +530,9 @@ but just cannot maintain zero queues.
 </t>
 
 </section>
+
+
+
 
 <section anchor = "sec-implementation"
 	 title = "Design Enhancement and Implementation">
@@ -663,109 +666,88 @@ or to the receivers depending on which version of HPCC++ algorithm (sender-based
 is used in the network.
 </t>
 </section>
-
 </section>
 
 <section anchor = "sec-implementations"
 	 title ="Reference Implementations">
 
-<t>A prototype of HPCC++ in commodity NICs with FPGA
-programmability is implemented to realize the CC algorithm and commodity
-switching ASICs to realize &INT; feature. </t>
+<t>A prototype of HPCC++ in NICs is implemented to realize the
+   CC algorithm and switches to realize the inband telemetry feature.</t>
 
-    <t><figure anchor="fig-nic"
+
+<section anchor = "sec-implementation-telemery"
+	 title ="Inband telemetry padding at the network elements">
+   <t>HPCC++ only relies on packets to share information across senders,
+   receivers, and switches. HPCC++ is open to a variety of inband telemetry format standards.
+   Inside a data center, the path length is often no more than 5 hops. 
+   The overhead of the inband telemetry padding for HPCC++ is considered to be low.
+   </t>
+
+</section>
+
+
+<section anchor = "sec-implementation-cc"
+	 title ="Congestion control at NICs">
+
+
+   <t><xref target="fig-nic"> </xref> shows HPCC++ implementation on a NIC.
+   The NIC provides an HPCC++ module that resides on the
+   data path of the NIC, HPCC++ modules realize both sender and receiver roles.</t>
+
+
+  <t><figure anchor="fig-nic"
                title="Overview of NIC Implementation">
     <artwork><![CDATA[
 
-                             
-  +----------------------------------------------+
-  | +-----------------------------------------+  |
-  | |               PCIe Module               |<-|-> Main Memory
-  | +-----------------------------------------+  |
-  |                    /|\                       |
-  |                     |  control, DMA          |
-  |                    \|/                       |
-  | +-----------------------------------------+  |
-  | |        Congestion Control Module        |  |
-  | +-----------------------------------------+  |
-  |     Update   |               /|\ Notify      |
-  |             \|/               |              |
-  | +-----------------------------------------+  |
-  | |              Flow Scheduler             |  |
-  | +-----------------------------------------+  |
-  |     PktSend  |               /|\ Notify      |
-  |             \|/               |              |
-  | +---------------+ PktRecv +---------------+  |
-  | |   Tx Pipe     |<--------|  Rx Pipe      |  |
-  | +---------------+         +---------------+  |
-  |              |               /|\             |
-  |             \|/               |              |
-  | +-----------------------------------------+  |
-  | |               MAC Module                |<-|-> Ethernet Adapter
-  | +-----------------------------------------+  |
-  +----------------------------------------------+
-
-]]></artwork>
+  +------------------------------------------------------------------+
+  |  +---------+ window update +-----------+ PktSend +-----------+   |
+  |  |         |-------------->| Scheduler |-------> |Tx pipeline|---+->
+  |  |         | rate update   +-----------+         +-----------+   |       
+  |  |  HPCC++ |                                           ^         |
+  |  |         |                           inband telemetry|         |
+  |  |  module |                                           |         |   
+  |  |         |                                     +-----+-----+   | 
+  |  |         |<----------------------------------- |Rx pipeline| <-+--
+  |  +---------+      telemetry response event       +-----------+   |
+  +------------------------------------------------------------------+
+         
+  ]]></artwork>
           </figure></t>
 
-<section anchor = "sec-implementation-header"
-	 title ="&INT; padding at switches">
+  <t>1. Sender side flow</t>
+   
+  <t>The HPCC++ module running the HPCC CC algorithm in the sender side for every flow in the NIC. 
+   Flow can be defined by some transport parameters including 5-tuples, destination QP (queue pair), etc.
+   It receives &INT; response events per flow which are generated from the RX pipeline, 
+   adjusts the sending window and rate, and update the scheduler on the rate and window of the flow.</t>
+   	
+  <t>The scheduler contains a pacing mechanism that determine the flow rate by the value it got from the algorithm. 
+   It also maintains the current sending window size for active flows.  
+   If the pacing mechanism and the flow's sending window permits, the 
+   scheduler invokes for the flow a PktSend command to TX pipeline.</t>
 
-<t>HPCC++ only relies on packets to share information across senders,
-receivers, and switches. HPCC++ is open to a variety of &INT; format standards.
-Inside a data center, the path length is often no more than 5 hops.
-The overhead of the &INT; padding for HPCC++ is low. </t>
+   <t>The TX pipeline implements RoCEv2 processing.
+   Once it receives the PktSend event with flow ID from the scheduler, 
+   it generates the corresponding packet and delivers to the Network.
+   If a sent packet should collect telemetry on its way the TX pipeline may add 
+   indications/headers that triggers the network elements to add telemetry data according to the &INT; protocol in use.
+   The telemetry can be collected by the data packet or by dedicated prob packets generated in the TX pipeline. </t>
 
+   <t>The RX pipe parses the incoming packets from the network and
+   identifies whether telemetry is embedded in the parsed packet. On receiving a telemetry response packet, the RX pipeline extracts the network 
+   status from the packet and passes it to the HPCC++ module for processing.
+   A telemetry response packet can be an ACK containing &INT;, or a dedicated telemetry response prob packet.</t>
 
+  <t>2. Receiver side flow</t>
+
+  <t>On receiving a packet containing &INT;, the RX pipeline extracts the network status, and the flow parameters from the packet
+   and passes it to the TX pipeline. The packet can be a data packet containing &INT;, or a dedicated telemetry request prob packet.
+   The Tx pipeline may process and edit the telemetry data, and then sends back to the sender the data using either an ACK packet of the flow or a dedicated telemetry response packet.</t>
+   </section>
+
+   
 </section>
 
-<section anchor = "sec-implementation-nic"
-	 title ="Congestion control at NICs">
-<t><xref target="fig-nic"> </xref> shows HPCC++ implementation on a commodity
-NIC. The NIC provides an FPGA chip which is connected to the
-main memory with a vendor-provided PCIe module and the Ethernet adapter 
-with a vendor-provided MAC module. Sitting between
-the PCIe and MAC modules, HPCC++ modules realize both sender
-and receiver roles. </t>
-
-<t>The Congestion Control (CC) module implements the sender
-side CC algorithm. It receives ACK events which are generated from
-the RX pipeline, adjusts the sending window and rate, and stores
-the new sending window and rate for the flow of the current ACK
-in the flow scheduler via an Update event. </t>
-
-<t>The flow scheduler paces flow rates with a credit-based mechanism. 
-Specifically, it scans through all the flows in a round-robin
-manner and assigns credit to each flow proportional to its current
-pacing rate. It also maintains the current sending window size and
-unacknowledged packets for active flows. If a flow has accumulated
-sufficient credits to send one packet and the flow's sending window
-permits, the flow scheduler invokes a PktSend event to TX pipe. </t>
-
-<t>The TX pipe implements IB/UDP/IP stacks for running in RoCEv2. 
-It maintains the flow context for each of concurrent flows,
-including 5-tuples, the packet sequence number (PSN), destination
-QP (queue pair), etc. Once it receives the PktSend event with QP
-ID from the flow scheduler, it generates the corresponding packet
-and delivers to the MAC module. </t>
-
-<t>The RX pipe parses the incoming packets from the MAC module and 
-generates multiple events to other HPCC++ modules. (1) On
-receiving a data packet, the RX pipe extracts its flow context and 
-invokes a PktRecv event to the TX pipe to formulate a corresponding
-ACK packet. If the packet is out-of-sequence (OOS), the TX pipe
-sends a NAK instead. (2) On receiving an ACK packet, the RX pipe
-extracts the network status from the packet and passes it to the CC
-module via the flow scheduler. (3) On receiving a NAK, the RX pipe
-notifies the TX pipe to start go-back-to-N retransmission. (4) On
-receiving a control packet with an RDMA operation, the RX pipe
-notifies the flow scheduler to create a flow with a new QP ID, or
-remove an existing flow. Currently, HPCC++ supports two operations:
-RDMA WRITE and RDMA READ. We leave the full support of IB
-verbs as future work. </t>
-</section>
-
-</section>
 
 <section anchor = "sec-iana"
 	 title = "IANA Considerations">
