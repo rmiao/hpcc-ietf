@@ -444,8 +444,8 @@ applications or based on theoretical and simulation studies.</t>
 13:             Wc
            W = ----- + W_ai;
                U/eta
-14:    if updateWc then
-15:        incStagee = 0; Wc = W ;
+14:        if updateWc then
+15:            incStagee = 0; Wc = W ;
 16:    else
 17:        W = Wc + W_ai ;
 18:        if updateWc then
