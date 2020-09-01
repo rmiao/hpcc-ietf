@@ -225,8 +225,7 @@ easy to deploy in hardware, implementable with commodity NICs and switches.</t>
       offloading network stacks into hardware is an inevitable
       direction in high-speed networks. 
       Large-scale networks with RDMA (remote direct memory access)
-      over Converged Ethernet Version 2 (RoCEv2) 
-      often uses hardware-offloading solutions.
+      often uses hardware-offloading solutions such as iWARP and RoCEv2.
       In some cases, the RDMA networks still face fundamental challenges
       to reconcile low latency, high bandwidth utilization, and high stability.</t>
 
@@ -251,6 +250,18 @@ easy to deploy in hardware, implementable with commodity NICs and switches.</t>
       HPCC++ is an enhanced version which takes into account system constraints and aims to reduce the design 
       overhead and further improves the performance. <xref target = "sec-implementation"></xref> describes these
       detailed proposed design enhancements and guidelines. </t>
+
+      <t> 
+      HPCC++ proposes a new architecture for congestion control in large-scale, high-speed networks. 
+      On one hand, HPCC++ leverages the inband telemetry for congestion feedback, which offers more precise link load information 
+      for congestion avoidance than conventional signals such as ECN or RTT. This draft describes the architecture changes in switches 
+      and end-host to support inband telemetry and proves the efficiency in handling network congestion. 
+      On the other hand, HPCC++ is generic to support a wide range of transport protocols such as TCP, UDP, iWARP, RoCE, etc. It requires 
+      to have the window limit and congestion feedback through ACK self-clocking, which naturally conforms to the paradigm of TCP and iWARP design. 
+      To run in UDP and RoCE, some modifications need to be done to enforce the window limit and collect congestion feedback via probing packets, 
+      which is incremental. In addition, this new architecture should work for both datacenter and the WAN networks, if the inband telemetry is 
+      supported in network switches and end-host protocols.
+      </t>
 
 
 <!--     <t>While the originall HPCC design lays the foundation for &INT;-based precision congestion control, 
@@ -726,7 +737,7 @@ is used in the network.
    If the pacing mechanism and the flow's sending window permits, the 
    scheduler invokes for the flow a PktSend command to TX pipeline.</t>
 
-   <t>The TX pipeline implements RoCEv2 processing.
+   <t>The TX pipeline implements packet processing.
    Once it receives the PktSend event with flow ID from the scheduler, 
    it generates the corresponding packet and delivers to the Network.
    If a sent packet should collect telemetry on its way the TX pipeline may add 
@@ -938,6 +949,18 @@ comments and helpful input to this specification. </t>
           </author>
 
           <author fullname="Ming Zhang" initials="M." surname="Zhang">
+            <organization></organization>
+          </author>
+
+          <author fullname="Frank Kelly" initials="F." surname="Kelly">
+            <organization></organization>
+          </author>
+
+          <author fullname="Mohammad Alizadeh" initials="M." surname="Alizadeh">
+            <organization></organization>
+          </author>
+
+          <author fullname="Minlan Yu" initials="M." surname="Yu">
             <organization></organization>
           </author>
 
