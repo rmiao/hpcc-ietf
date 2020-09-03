@@ -225,7 +225,7 @@ easy to deploy in hardware, implementable with commodity NICs and switches.</t>
       offloading network stacks into hardware is an inevitable
       direction in high-speed networks. 
       Large-scale networks with RDMA (remote direct memory access)
-      often uses hardware-offloading solutions such as iWARP and RoCEv2.
+      often uses hardware-offloading solutions.
       In some cases, the RDMA networks still face fundamental challenges
       to reconcile low latency, high bandwidth utilization, and high stability.</t>
 
@@ -256,11 +256,13 @@ easy to deploy in hardware, implementable with commodity NICs and switches.</t>
       On one hand, HPCC++ leverages the inband telemetry for congestion feedback, which offers more precise link load information 
       for congestion avoidance than conventional signals such as ECN or RTT. This draft describes the architecture changes in switches 
       and end-host to support inband telemetry and proves the efficiency in handling network congestion. 
-      On the other hand, HPCC++ is generic to support a wide range of transport protocols such as TCP, UDP, iWARP, RoCE, etc. It requires 
-      to have the window limit and congestion feedback through ACK self-clocking, which naturally conforms to the paradigm of TCP and iWARP design. 
-      To run in UDP and RoCE, some modifications need to be done to enforce the window limit and collect congestion feedback via probing packets, 
-      which is incremental. In addition, this new architecture should work for both datacenter and the WAN networks, if the inband telemetry is 
-      supported in network switches and end-host protocols.
+      On the other hand, HPCC++ is generic to support a wide range of transport protocols such as TCP, UDP, iWARP, etc. 
+      It requires to have the window limit and congestion feedback through ACK self-clocking, which naturally conforms to 
+      the paradigm of TCP/iWARP design. However, HPCC++ introduces a scheme to measure the total inflight bytes for 
+      more precise congestion control. To run in UDP, some modifications need to be done to enforce the window limit 
+      and collect congestion feedback via probing packets, 
+      which is incremental. In addition, this new architecture should work for both datacenter and the WAN networks, 
+      if the inband telemetry is supported in network switches and end-host protocols.
       </t>
 
 
@@ -561,6 +563,7 @@ the over-reaction issue from using this per-packet response. </t>
 the overhead. Switches can generate &INT; less frequently, e.g., once per RTT or upon 
 congestion happening. </t> 
 
+
 <section anchor = "sec-guideline"
 	 title = "HPCC++ Guidelines">
 <t>
@@ -635,7 +638,7 @@ is to replace NewACK(int.L)
 Here, since the receiver does not know the starting sequence number of a burst, 
 it simply records the lastUpdateTime. If time T has passed since lastUpdateTime, 
 the algorithm would recalcuate Wc as in Line 30 and send out the ACK packet which
-would include W informtion. Otherwise, it would just update W information locally.
+would include W information. Otherwise, it would just update W information locally.
 This would reduce the amount of traffic that needs to be feedback to the data sender.
 </t>
 
@@ -649,6 +652,7 @@ under heavy load.
 
 </section>
 
+<!--
 <section anchor = "subsec-int"
 	       title = "Switch-side Optimizations">
 <t>
@@ -677,7 +681,12 @@ or to the receivers depending on which version of HPCC++ algorithm (sender-based
 is used in the network.
 </t>
 </section>
+
+-->
+
 </section>
+
+
 
 <section anchor = "sec-implementations"
 	 title ="Reference Implementations">
