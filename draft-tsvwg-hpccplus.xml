@@ -147,8 +147,8 @@ HPCC++ (High Precision Congestion Control), a new high-speed CC
 mechanism which achieves the three goals simultaneously. HPCC++
 leverages inband telemetry to obtain precise link load
 information and controls traffic precisely. By addressing challenges
-such as delayed &INT; information during congestion and overreaction to &INT; information, HPCC++ can quickly 
-converge to utilize free bandwidth while avoiding congestion, and can maintain near-zero
+such as delayed signaling during congestion and overreaction to the congestion signaling using inband and granular telemetry, HPCC++ can quickly 
+converge to utilize all the available bandwidth while avoiding congestion, and can maintain near-zero
 in-network queues for ultra-low latency. HPCC++ is also fair and
 easy to deploy in hardware, implementable with commodity NICs and switches.</t>
    </abstract>
@@ -165,21 +165,21 @@ easy to deploy in hardware, implementable with commodity NICs and switches.</t>
       future high-speed networks. </t>
 
     <t>Given that traditional software-based network stacks in hosts
-      can no longer sustain the critical latency and bandwidth requirements <xref target="Zhu-SIGCOMM2015"> </xref>, 
+      can no longer sustain the critical latency and bandwidth requirements as described in <xref target="Zhu-SIGCOMM2015"> </xref>, 
       offloading network stacks into hardware is an inevitable
       direction in high-speed networks. 
-      Large-scale networks with RDMA (remote direct memory access)
+      As an example, large-scale networks with RDMA (remote direct memory access)
       often uses hardware-offloading solutions.
       In some cases, the RDMA networks still face fundamental challenges
       to reconcile low latency, high bandwidth utilization, and high stability.</t>
 
-    <t>This document describes a new CC mechanism, HPCC++ (Enhanced High Precision Congestion Control), 
+    <t>This document describes a new congestion control mechanism, HPCC++ (Enhanced High Precision Congestion Control), 
       for large-scale, high-speed networks. The key idea behind HPCC++ is to leverage the precise link load 
-      information from &INT; to compute accurate flow rate updates. Unlike
+      information from signaled through &INT; to compute accurate flow rate updates. Unlike
       existing approaches that often require a large number of iterations
       to find the proper flow rates, HPCC++ requires only one rate update
       step in most cases. Using precise information from &INT; enables
-      HPCC++ to address the limitations in current CC schemes. First,
+      HPCC++ to address the limitations in current congestion control schemes. First,
       HPCC++ senders can quickly ramp up flow rates for high utilization
       and ramp down flow rates for congestion avoidance. Second, HPCC++
       senders can quickly adjust the flow rates to keep each link's output rate slightly lower than 
@@ -197,16 +197,16 @@ easy to deploy in hardware, implementable with commodity NICs and switches.</t>
 
       <t> 
       HPCC++ proposes a new architecture for congestion control in large-scale, high-speed networks. 
-      On one hand, HPCC++ leverages the inband telemetry for congestion feedback, which offers more precise link load information 
-      for congestion avoidance than conventional signals such as ECN or RTT. This draft describes the architecture changes in switches 
-      and end-host to support inband telemetry and proves the efficiency in handling network congestion. 
-      On the other hand, HPCC++ is generic to support a wide range of transport protocols such as TCP, UDP, iWARP, etc. 
+      On one hand, HPCC++ leverages inband telemetry for congestion feedback, which offers more precise link load and queue status information 
+      for congestion control and avoidance than conventional signals such as ECN or RTT. This draft describes the architecture changes in switches 
+      and end-hosts to support the needed tranmission of inband telemetry and its consumption, that imporves the efficiency in handling network congestion. 
+      On the other hand, HPCC++ is generic to support a wide range of transport protocols such as TCP and UDP, as well as others that may run on top of them, such as iWARP, RoCE etc. 
       It requires to have the window limit and congestion feedback through ACK self-clocking, which naturally conforms to 
-      the paradigm of TCP/iWARP design. However, HPCC++ introduces a scheme to measure the total inflight bytes for 
+      the paradigm of TCP design. With that, HPCC++ introduces a scheme to measure the total inflight bytes for 
       more precise congestion control. To run in UDP, some modifications need to be done to enforce the window limit 
       and collect congestion feedback via probing packets, 
-      which is incremental. In addition, this new architecture should work for both datacenter and the WAN networks, 
-      if the inband telemetry is supported in network switches and end-host protocols.
+      which is incremental. This new architecture is applicable for both datacenter and WAN networks, 
+      given the devices for either type of network support all the needed capabilities.
       </t>
 
 
@@ -270,21 +270,21 @@ easy to deploy in hardware, implementable with commodity NICs and switches.</t>
           </figure></t>
 
   <t><list style="symbols">
-	<t>Data sender: responsible for controlling inflight bytes. HPCC++ is a window-based CC scheme that 
+	<t>Data sender: responsible for controlling inflight bytes. HPCC++ is a window-based congestion control scheme that 
         controls the number of inflight bytes. The inflight bytes mean the amount 
-	      of data that have been sent, but not acknowledged at the sender yet.
+	      of data that have been sent, but not acknowledged by the sender yet.
         Controlling inflight bytes has an important advantage compared
         to controlling rates. In the absence of congestion, the inflight bytes
         and rate are interchangeable with equation inflight = rate * T
         where T is the base propagation RTT. The rate can be calculated locally 
 	      or obtained from the notification packet. 
-        The sender may further use the data pacing mechanism in hardware to limit the rate accordingly.
+        The sender may further use the data pacing mechanism, potentially implemented in hardware, to limit the rate accordingly.
   </t>
 
 	<t> Network nodes: responsible of inserting the &INT; information 
         to the data packet. The &INT; information reports the current load of the
         packet's egress port, including timestamp (ts), queue length (qLen),
-	      transmitted bytes (txBytes), and the link bandwidth capacity (B).
+	      transmitted bytes (txBytes), and link bandwidth capacity (B).
         Besides, the &INT; contains switch_ID and port_ID to identify a link.
  </t>
 
@@ -496,16 +496,16 @@ but just cannot maintain zero queues.
 
 <t>
 The basic design of HPCC++, i.e. HPCC, as described above is to add &INT; information
-into every data packet to response congestion as soon as the very first packet
+into every data packet to react to congestion as soon as the very first packet
 observing the network congestion. This is especially helpful to reduce the risk
-of severe congestion in incast scenario at the first round-trip time. In addition, 
+of severe congestion in incast scenarios at the first round-trip time. In addition, 
 original HPCC's algorithm introduction of Wc is for the purpose of solving 
 the over-reaction issue from using this per-packet response. </t>
 
 
 <t>Alternatively, the &INT; information needs not to be added to every data packet to reduce
-the overhead. Switches can generate &INT; less frequently, e.g., once per RTT or upon 
-congestion happening. </t> 
+the overhead. Switches can attach &INT; less frequently, e.g., once per RTT or upon 
+congestion occurance. </t> 
 
 
 <section anchor = "sec-guideline"
@@ -635,8 +635,8 @@ is used in the network.
 <section anchor = "sec-implementations"
 	 title ="Reference Implementations">
 
-<t>A prototype of HPCC++ in NICs is implemented to realize the
-   CC algorithm and switches to realize the inband telemetry feature.</t>
+<t>A prototype of HPCC++ is implemented in NICs to realize the
+   congestion control algorithm and in switches to realize the inband telemetry feature.</t>
 
 
 <section anchor = "sec-implementation-telemery"
