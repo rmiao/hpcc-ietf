@@ -10,7 +10,7 @@
 <?rfc compact="yes" ?>
 <?rfc symrefs="yes" ?>
 <rfc category="exp" 
-     docName="draft-pan-tsvwg-hpccplus-01"
+     docName="draft-pan-tsvwg-hpccplus-02"
      ipr="trust200902">
   <!-- What is the category field value-->
 
@@ -128,62 +128,6 @@
         <email>yuvals@nvidia.com</email>
       </address>
     </author>
-
-
-
-
-<!--
-    <author fullname="Paul E. Jones" initials="P. E." surname="Jones">
-      <organization>Cisco Systems</organization>
-
-      <address>
-        <postal>
-          <street>7025 Kit Creek Rd.</street>
-          <city>Research Triangle Park</city>
-          <region>NC</region>
-          <code>27709</code>
-          <country>USA</country>
-        </postal>
-	
-	<email>paulej@packetizer.com</email>
-      </address>
-    </author>
-
-    <author fullname="Jiantao Fu" initials="J." surname="Fu">
-      <organization>Cisco Systems</organization>
-
-      <address>
-        <postal>
-          <street>707 Tasman Drive</street>
-          <city>Milpitas</city>
-          <region>CA</region>
-          <code>95035</code>
-          <country>USA</country>
-        </postal>
-
-        <email>jianfu@cisco.com</email>
-      </address>
-    </author>
-
-
-    <author fullname="Stefano D'Aronco" initials="S." surname="D'Aronco">
-      <organization abbrev="ETH">ETH Zurich</organization>
-
-      <address>
-        <postal>
-          <street>Stefano-Franscini-Platz 5</street>
-          <city>Zurich</city>
-          <region></region>
-          <code>8093</code>
-          <country>Switzerland</country>
-        </postal>
-	
-	<email>stefano.daronco@geod.baug.ethz.ch</email>
-      </address>
-    </author>
-
-  -->
-
     
     <date year="2020" />
 
