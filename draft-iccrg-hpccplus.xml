@@ -709,7 +709,7 @@ is used in the network.
 
 
 <section anchor = "sec-Internet"
-	 title = "Interent Deployment">
+	 title = "Internet Deployment">
 
   <t>Although the discussion above mainly focuses on the data center environment, HPCC++ can be adopted at Internet at large.
   There are several security considerations one should be aware of.
@@ -745,17 +745,20 @@ is used in the network.
 
   <t><list style="symbols">
 
-  <t>First, HPCC++ requires only the ``write-to-packet'' operation from the switch, which has already been supported by telemetry protocols
+  <t>First, HPCC++ implements a primal-mode algorithm that requires only the ``write-to-packet'' operation from switches, which has already been supported by telemetry protocols
   like INT <xref target="P4-INT"></xref> or IOAM <xref target="I-D.ietf-ippm-ioam-data"></xref>. 
   </t>
 
-  <t>Second, HPCC++ implements a primal-mode algorithm to achieve a faster utilization convergence by decoupling it from fairness convergence, 
-  while dual-mode algorithms like XCP and RCP achieve both convergences simultaneously but at relatively longer time.</t>
+  <t>Second, HPCC++ achieves a fast utilization convergence by decoupling it from fairness convergence, which is inspired by XCP.</t>
 
-  <t>Third, HPCC++ defines the ``inflight byte'' to quantify both the underload and overload
-  and thus it allows the flow to increase/decrease the rate multiplicatively.
-  By contrast, traditional approach of having the queue length as the only feedback 
-  subjects to latency inflation of a having standing queue and cannot guide the rate increase.
+
+  <t>Third, HPCC++ enables the switch-guided multiplicative increase (MI) by defining the ``inflight byte'' 
+  to quantify the link load. The inflight byte tells both the underload and overload of the link precisely
+  and thus it allows the flow to increase/decrease the rate multiplicatively and safely.
+  By contrast, traditional approaches of using the queue length or RTT as the feedback cannot guide the rate increase 
+  and instead have to rely on additive increase (AI) with heuristics.
+  As the link speed contines to grow, this becomes increasingly slow in reclaiming the unused bandwidth.
+  Besides, queue-based feedback mechanisms subject to latency inflation.
   </t>
 
   <t>Last, HPCC++ uses TX rate instead of RX rate used by XCP and RCP. 

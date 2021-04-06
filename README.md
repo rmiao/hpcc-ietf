@@ -9,5 +9,5 @@ HPCC++ IETF draft
   - `pip install xml2rfc`
 
 - generate txt file (`xml2rfc SOURCE [options] FORMATS...`)
-  - `xml2rfc draft-tsvwg-hpccplus.xml`
+  - `xml2rfc draft-iccrg-hpccplus.xml`
 
