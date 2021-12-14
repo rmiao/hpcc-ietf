@@ -1,0 +1,33 @@
+> Logistics
+  > keep in ICCRG and modify
+  > move to RTGWG once it is ready
+  > Next meeting starting from Jan 4.
+
+> inband ACK mechanism or separate probing packet
+  > explain the mechanisms and all options for people to discuss
+  > the decision tree can be inband or probing
+  > in case of inband
+    > TCP option or UDP header
+    > some IFA packet 
+  > in case of probing packet
+
+> Example implementation on IFA or IOAM
+  > Intel, Nvidia, Cisco and marvel can work on p4, having p4 code is great
+  > Broacom might insist on IFA
+  > We agree to write the concrete header formats: IFA 2.0, IETF IOAM, p4 INT
+    > (Rui) INVITE broadcom folk to give an update. Ask to open the template: IP option, metadata part, etc.
+
+> Example implementation on RDMA RoCEv2
+  > header format 
+  > pesudo-code for implementation
+  > RoCEv2 doesnt have ACK packet so we use probing packet with MAD packet
+    > customized CNP packet in return using the reserved 16 bytes 
+    > do we need to specify the usage of the reserved bytes in IBTA or MLNX?
+    
+> TCP version of HPCC
+  > embeded into TCP option header
+  > how to handle TCP LSO (64KB or 32KB)?
+    
+> Path migration
+  > switch paths once a path is congested or failed
+  
