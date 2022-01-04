@@ -10,7 +10,7 @@
 <?rfc compact="yes" ?>
 <?rfc symrefs="yes" ?>
 <rfc category="exp" 
-     docName="draft-pan-iccrg-hpccplus-01"
+     docName="draft-miao-iccrg-hpccplus-01"
      ipr="trust200902">
   <!-- What is the category field value-->
 
@@ -128,8 +128,21 @@
         <email>yuvals@nvidia.com</email>
       </address>
     </author>
+    <author fullname="Jeff Tantsura" initials="J. " surname="Tantsura">
+      <organization>Microsoft Corporation</organization>
+      <address>
+        <postal>
+          <street>One Microsoft Way</street>
+          <city>Redmond</city>
+          <region>Washington</region>
+          <code>98052-6399</code>
+          <country>USA</country>
+        </postal>
+        <email>jefftantsura@microsoft.com</email>
+      </address>
+    </author>
     
-    <date year="2020" />
+    <date year="2021" />
 
     <area>TSV</area>
 
@@ -474,7 +487,7 @@ but just cannot maintain zero queues.
 
 
 <section anchor = "sec-implementation"
-	 title = "Design Enhancement and Implementation">
+	 title = "Design enhancement and implementation">
 
 <t>
 The basic design of HPCC++, i.e. HPCC, as described above is to add &INT; information
@@ -487,7 +500,9 @@ the over-reaction issue from using this per-packet response. </t>
 
 <t>Alternatively, the &INT; information needs not to be added to every data packet to reduce
 the overhead. Switches can attach &INT; less frequently, e.g., once per RTT or upon 
-congestion occurance. </t> 
+congestion occurance. </t>
+
+<t>There are three compoments we need to implement: telementry padding, congestion notification, and congestion control at NICs.</t>
 
 
 <section anchor = "sec-guideline"
@@ -510,10 +525,9 @@ guidelines for different implementations:</t>
      estimate.</t>
 
   <t> HPCC++ can use a probe packet to query the &INT; information. Thereby, the probe packets should take the same routing path and QoS queueing with the data packets. </t>
+</list> </t>
 
-     </list> </t>
-
-<t> As long the above guidelines are met, this document does not
+<!-- <t> As long the above guidelines are met, this document does not
    mandate a particular &INT; header format or encapsulation,
    which are orthogonal to the HPCC++ algorithm
    described in this document. The algorithm can be implemented with a choice
@@ -521,64 +535,15 @@ guidelines for different implementations:</t>
   IFA <xref target="I-D.ietf-kumar-ippm-ifa"></xref> and others. 
   In fact, the emerging inband telemetry protocols can inform the evolution for a broader range of protocols and network functions, 
   where this document leverages the trend to propose the architecture change to support HPCC++ algorithm.
- </t>
+ </t> -->
 
 </section>
+
 
 <!--Once per burst of packets or once per window might be sufficient
 for rate calculations in capacity-limited NICs. But the algorithm should commit 
 the window/rate update at most once per round-trip time, similar with the procedure of 
 updating Wc.</t> -->
-
-<section anchor = "subsec-rxhpcc"
-	       title = "Receiver-based HPCC">
-<t>
-Note that the window/rate calculation can be implemented at
-either the data sender or the data receiver. 
-If the ACK packets already 
-exist for reliability purpose, the &INT; information can be echoed back to
-the sender via ACK self-clocking. Not all ACK packets need to carry the &INT; information. 
-To reduce the Packet Per Second (PPS) overhead,
-the receiver may examine the &INT; information and adopt the technique of 
-delayed ACKs that only sends out an ACK for a few of received packets. 
-In order to reduce PPS even further, one may implement the algorithm at the receiver and
-feedback the calculated window in the ACK packet once every RTT. 
-</t>
-
-<t>
-The receiver-based algorithm, Rx-HPCC, 
-is based on int.L, which is the &INT; information in the packet header. The receiver
-performs the same functions except using int.L instead of ack.L. The new function NewINT(int.L)
-is to replace NewACK(int.L)
-</t>
-
-<t><figure><artwork><![CDATA[
-28:   Procedure NewINT(int.L)
-29:   if now > (lastUpdateTime + T) then
-30:      W = ComputeWind(MeasureInflight(int), True);
-31:      send_ack(W)
-32:      lastUpdateTime = now;
-33:   else
-34:      W = ComputeWind(MeasureInflight(int), False);
-]]></artwork></figure></t>
-
-<t>
-Here, since the receiver does not know the starting sequence number of a burst, 
-it simply records the lastUpdateTime. If time T has passed since lastUpdateTime, 
-the algorithm would recalcuate Wc as in Line 30 and send out the ACK packet which
-would include W information. Otherwise, it would just update W information locally.
-This would reduce the amount of traffic that needs to be feedback to the data sender.
-</t>
-
-<t>
-Note that the receiver can also measure the number of outstanding flows, N, 
-if the last hop is the congestion point and use this information
-to dynamically adjust W_ai to achieve better fairness. 
-The improvement would allow flows to quickly converge to fairness without causing large swings 
-under heavy load.  
-</t>
-
-</section>
 
 <!--
 <section anchor = "subsec-int"
@@ -612,31 +577,68 @@ is used in the network.
 
 -->
 
-</section>
-
-
-
-<section anchor = "sec-implementations"
-	 title ="Reference Implementations">
-
-<t>A prototype of HPCC++ is implemented in NICs to realize the
-   congestion control algorithm and in switches to realize the inband telemetry feature.</t>
-
-
 <section anchor = "sec-implementation-telemery"
-	 title ="Inband telemetry padding at the network elements">
+	 title ="Inband telemetry padding at the network switches">
    <t>HPCC++ only relies on packets to share information across senders,
    receivers, and switches. HPCC++ is open to a variety of inband telemetry format standards.
    Inside a data center, the path length is often no more than 5 hops. 
-   The overhead of the inband telemetry padding for HPCC++ is considered to be low.
-   </t>
+   The overhead of the inband telemetry padding for HPCC++ is considered to be low.</t>
+
+  <t> As long the above guidelines are met, this document does not
+   mandate a particular &INT; header format or encapsulation,
+   which are orthogonal to the HPCC++ algorithm
+   described in this document. The algorithm can be implemented with a choice
+   of inband telemetry protocols, such as in-band network telemetry <xref target="P4-INT"></xref>, IOAM <xref target="I-D.ietf-ippm-ioam-data"></xref>,
+  IFA <xref target="I-D.ietf-kumar-ippm-ifa"></xref> and others. 
+  In fact, the emerging inband telemetry protocols can inform the evolution for a broader range of protocols and network functions, 
+  where this document leverages the trend to propose the architecture change to support HPCC++ algorithm.
+
+  Here we provide three concrete formats to implement inband telemetry.
+  </t>
+
+  <section anchor = "sec-implementation-ifa"
+	 title ="Inband telemetry on IFA">
+   <t>IFA</t>
+   </section>
+
+
+  <section anchor = "sec-implementation-ioam"
+	 title ="Inband telemetry on IOAM">
+   <t>IOAM</t>
+   </section>
+
+  <section anchor = "sec-implementation-p4"
+	 title ="Inband telemetry on P4">
+   <t>P4</t>
+   </section>
+
+   
 
 </section>
 
+  <section anchor = "sec-notification"
+    title = "Congestion Notification">
+
+    <t>HPCC++ uses either inband ACK mechanism or separate probing packet for congestion notification. </t>
+
+      <section anchor = "sec-notification-inband"
+	      title ="Using ACK packet">
+      <t>inbound: TCP option or UDP header</t>
+      </section>
+
+      <section anchor = "sec-notification-probing"
+	      title ="Using probing packet">
+      <t>probing packet</t>
+      </section>
+  </section>
 
 <section anchor = "sec-implementation-cc"
 	 title ="Congestion control at NICs">
 
+  
+
+  <section anchor = "subsec-txhpcc"
+	       title = "Sender-based HPCC">
 
    <t><xref target="fig-nic"> </xref> shows HPCC++ implementation on a NIC.
    The NIC provides an HPCC++ module that resides on the
@@ -693,9 +695,90 @@ is used in the network.
    The Tx pipeline may process and edit the telemetry data, and then sends back to the sender the data using either an ACK packet of the flow or a dedicated telemetry response packet.</t>
    </section>
 
-   
+<section anchor = "subsec-rxhpcc"
+	       title = "Receiver-based HPCC">
+<t>
+Note that the window/rate calculation can be implemented at
+either the data sender or the data receiver. 
+If the ACK packets already 
+exist for reliability purpose, the &INT; information can be echoed back to
+the sender via ACK self-clocking. Not all ACK packets need to carry the &INT; information. 
+To reduce the Packet Per Second (PPS) overhead,
+the receiver may examine the &INT; information and adopt the technique of 
+delayed ACKs that only sends out an ACK for a few of received packets. 
+In order to reduce PPS even further, one may implement the algorithm at the receiver and
+feedback the calculated window in the ACK packet once every RTT. 
+</t>
+
+<t>
+The receiver-based algorithm, Rx-HPCC, 
+is based on int.L, which is the &INT; information in the packet header. The receiver
+performs the same functions except using int.L instead of ack.L. The new function NewINT(int.L)
+is to replace NewACK(int.L)
+</t>
+
+<t><figure><artwork><![CDATA[
+28:   Procedure NewINT(int.L)
+29:   if now > (lastUpdateTime + T) then
+30:      W = ComputeWind(MeasureInflight(int), True);
+31:      send_ack(W)
+32:      lastUpdateTime = now;
+33:   else
+34:      W = ComputeWind(MeasureInflight(int), False);
+]]></artwork></figure></t>
+
+<t>
+Here, since the receiver does not know the starting sequence number of a burst, 
+it simply records the lastUpdateTime. If time T has passed since lastUpdateTime, 
+the algorithm would recalcuate Wc as in Line 30 and send out the ACK packet which
+would include W information. Otherwise, it would just update W information locally.
+This would reduce the amount of traffic that needs to be feedback to the data sender.
+</t>
+
+<t>
+Note that the receiver can also measure the number of outstanding flows, N, 
+if the last hop is the congestion point and use this information
+to dynamically adjust W_ai to achieve better fairness. 
+The improvement would allow flows to quickly converge to fairness without causing large swings 
+under heavy load.  
+</t>
+
 </section>
 
+</section>
+
+</section>
+
+
+
+  <section anchor = "sec-reference"
+    title = "Reference Implementation">
+
+    <t>
+      HPCC++ can be adopted as the CC algorithm by a wide range of transport protocols such as TCP and UDP, 
+      as well as others that may run on top of them, such as iWARP, RoCE etc. 
+      It requires to have the window limit and congestion feedback through ACK self-clocking, which naturally conforms to 
+      the paradigm of TCP design. 
+      With that, HPCC++ introduces a scheme to measure the total inflight bytes for 
+      more precise congestion control. To run in UDP, some modifications need to be done to enforce the window limit 
+      and collect congestion feedback via probing packets, 
+      which is incremental. 
+    </t>
+
+    <section anchor = "sec-reference-roce"
+      title = "Implementation on RDMA RoCEv2">
+        <t>
+       We describe reference implementation on RDMA RoCEv2. 
+    </t>
+    </section>
+
+    <section anchor = "sec-reference-tcp"
+      title = "Implementation on TCP">
+      <t>
+       We describe reference implementation on RDMA RoCEv2. 
+    </t>
+    </section>
+  </section>
 
 <section anchor = "sec-iana"
 	 title = "IANA Considerations">
@@ -716,7 +799,7 @@ is used in the network.
   </t>
 
   <t>There may rise privacy concern when the telemetry information is conveyed across Autonomous Systems (ASes) and back to end-users.
-    Because the link load information captured in telemetry can potentially reveal the provider's network capacity, route utilization, 
+    The link load information captured in telemetry can potentially reveal the provider's network capacity, route utilization, 
     scheduling policy, etc. Those usually are considered to be sensitive data of the network providers. Hence, certain action may take to 
     anonymize the telemetry data and only convey the relative ratio in rate adaptation across ASes without revealing the actual network load.
   </t>
@@ -737,22 +820,21 @@ is used in the network.
 
   <section anchor = "sec-assisted"
 	 title = "Switch-assisted congestion control">
-
-  <t>HPCC++ falls in the general category of switch-assisted congestion control, similar with XCP <xref target="Katabi-SIGCOMM2002"></xref>
-  and RCP <xref target="Dukkipati-RCP"></xref>. 
+   
+  <t>HPCC++ falls in the general category of switch-assisted congestion control.
   However, HPCC++ includes a few unique design choices that are different from other switch-assisted approaches.</t>
-  <!-- HPCC++ requires the switches along the path to provide the detailed load information for its rate update.  -->
 
   <t><list style="symbols">
 
-  <t>First, HPCC++ implements a primal-mode algorithm that requires only the ``write-to-packet'' operation from switches, which has already been supported by telemetry protocols
-  like INT <xref target="P4-INT"></xref> or IOAM <xref target="I-D.ietf-ippm-ioam-data"></xref>. 
+  <t>First, HPCC++ implements a primal-mode algorithm that requires only the ``write-to-packet'' operation from switches, 
+  which has already been supported by telemetry protocols like INT <xref target="P4-INT"></xref> or IOAM <xref target="I-D.ietf-ippm-ioam-data"></xref>. 
+  Please note that this is very different from dual-mode algorithms such as XCP <xref target="Katabi-SIGCOMM2002"></xref> 
+  and RCP <xref target="Dukkipati-RCP"></xref>, where switches take an actively role in determining flows' rates.
   </t>
-
+  
   <t>Second, HPCC++ achieves a fast utilization convergence by decoupling it from fairness convergence, which is inspired by XCP.</t>
 
-
-  <t>Third, HPCC++ enables the switch-guided multiplicative increase (MI) by defining the ``inflight byte'' 
+<t>Third, HPCC++ enables the switch-guided multiplicative increase (MI) by defining the ``inflight byte'' 
   to quantify the link load. The inflight byte tells both the underload and overload of the link precisely
   and thus it allows the flow to increase/decrease the rate multiplicatively and safely.
   By contrast, traditional approaches of using the queue length or RTT as the feedback cannot guide the rate increase 
@@ -762,27 +844,11 @@ is used in the network.
   </t>
 
   <t>Last, HPCC++ uses TX rate instead of RX rate used by XCP and RCP. 
-  As detailed in [SIGCOMM-HPCC], we view the TX rate is more precise 
+  As detailed in <xref target="SIGCOMM-HPCC"></xref>, we view the TX rate is more precise 
   because RX rate and queue length are overlapped and thus it causes oscillation.
   </t>
   
   </list></t>
-  </section> 
-
-
-  <section anchor = "sec-transport"
-    title = "Work with transport protocols">
-
-    <t>
-      HPCC++ is generic to support a wide range of transport protocols such as TCP and UDP, 
-      as well as others that may run on top of them, such as iWARP, RoCE etc. 
-      It requires to have the window limit and congestion feedback through ACK self-clocking, which naturally conforms to 
-      the paradigm of TCP design. 
-      With that, HPCC++ introduces a scheme to measure the total inflight bytes for 
-      more precise congestion control. To run in UDP, some modifications need to be done to enforce the window limit 
-      and collect congestion feedback via probing packets, 
-      which is incremental. 
-    </t>
   </section>
 
   <section anchor = "sec-QoS"
