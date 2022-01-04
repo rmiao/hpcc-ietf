@@ -867,6 +867,12 @@ under heavy load.
     </t>
 
   </section> 
+    <section anchor = "sec-path"
+	 title = "Path migration">
+    
+    <t> HPCC++ provides the information to switch paths once a path is congested or failed.</t>
+
+  </section> 
 </section> 
 
 <section anchor = "sec-acknowledgments"

@@ -117,6 +117,7 @@ Internet-Draft                   HPCC++                     January 2021
      9.1.  Internet Deployment . . . . . . . . . . . . . . . . . . .  13
      9.2.  Switch-assisted congestion control  . . . . . . . . . . .  14
      9.3.  Work with QoS queuing . . . . . . . . . . . . . . . . . .  14
+     9.4.  Path migration  . . . . . . . . . . . . . . . . . . . . .  15
    10. Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .  15
    11. Contributors  . . . . . . . . . . . . . . . . . . . . . . . .  15
    12. References  . . . . . . . . . . . . . . . . . . . . . . . . .  15
@@ -160,8 +161,7 @@ Internet-Draft                   HPCC++                     January 2021
    three independent parameters that are used to tune fairness and
    efficiency.
 
-   The base form of HPCC++ is the original HPCC algorithm and its full
-   description can be found in [SIGCOMM-HPCC].  While the original
+
 
 
 
@@ -170,6 +170,8 @@ Miao, et al.              Expires July 7, 2022                  [Page 3]
 Internet-Draft                   HPCC++                     January 2021
 
 
+   The base form of HPCC++ is the original HPCC algorithm and its full
+   description can be found in [SIGCOMM-HPCC].  While the original
    design lays the foundation for inband telemetry based precision
    congestion control, HPCC++ is an enhanced version which takes into
    account system constraints and aims to reduce the design overhead and
@@ -210,8 +212,6 @@ Internet-Draft                   HPCC++                     January 2021
    (potentially uncongested) path that the RTCP feedback reports
    traverse.  Those network nodes are not shown in the figure for sake
    of brevity.
-
-
 
 
 
@@ -792,6 +792,11 @@ Internet-Draft                   HPCC++                     January 2021
    provides a minimum bandwdith guarantee for each queue so that HPCC++
    can leverage it for precise rate update to avoid congestion.
 
+9.4.  Path migration
+
+   HPCC++ provides the information to switch paths once a path is
+   congested or failed.
+
 10.  Acknowledgments
 
    The authors would like to thank ICCRG members for their valuable
@@ -830,17 +835,17 @@ Internet-Draft                   HPCC++                     January 2021
               Control", draft-ietf-avtcore-cc-feedback-message-09 (work
               in progress), November 2020.
 
-   [I-D.ietf-ippm-ioam-data]
-              "Data Fields for In-situ OAM", March 2020,
-              <https://tools.ietf.org/html/draft-ietf-ippm-ioam-data-
-              09>.
-
 
 
 Miao, et al.              Expires July 7, 2022                 [Page 15]
 
 Internet-Draft                   HPCC++                     January 2021
 
+
+   [I-D.ietf-ippm-ioam-data]
+              "Data Fields for In-situ OAM", March 2020,
+              <https://tools.ietf.org/html/draft-ietf-ippm-ioam-data-
+              09>.
 
    [I-D.ietf-kumar-ippm-ifa]
               "Inband Flow Analyzer", February 2019,
@@ -879,13 +884,8 @@ Authors' Addresses
    Email: miao.rui@alibaba-inc.com
 
 
-   Hongqiang H. Liu
-   Alibaba Group
-   108th Ave NE, Suite 800
-   Bellevue, WA  98004
-   USA
 
-   Email: hongqiang.liu@alibaba-inc.com
+
 
 
 
@@ -896,6 +896,15 @@ Authors' Addresses
 Miao, et al.              Expires July 7, 2022                 [Page 16]
 
 Internet-Draft                   HPCC++                     January 2021
+
+
+   Hongqiang H. Liu
+   Alibaba Group
+   108th Ave NE, Suite 800
+   Bellevue, WA  98004
+   USA
+
+   Email: hongqiang.liu@alibaba-inc.com
 
 
    Rong Pan
@@ -934,15 +943,6 @@ Internet-Draft                   HPCC++                     January 2021
    Email: gbarak@mellanox.com
 
 
-   Yuval Shpigelman
-   Mellanox Technologies, Inc.
-   Haim Hazaz 3A
-   Netanya  4247417
-   Israel
-
-   Email: yuvals@nvidia.com
-
-
 
 
 
@@ -954,6 +954,15 @@ Miao, et al.              Expires July 7, 2022                 [Page 17]
 Internet-Draft                   HPCC++                     January 2021
 
 
+   Yuval Shpigelman
+   Mellanox Technologies, Inc.
+   Haim Hazaz 3A
+   Netanya  4247417
+   Israel
+
+   Email: yuvals@nvidia.com
+
+
    Jeff Tantsura
    Microsoft Corporation
    One Microsoft Way
@@ -961,15 +970,6 @@ Internet-Draft                   HPCC++                     January 2021
    USA
 
    Email: jefftantsura@microsoft.com
-
-
-
-
-
-
-
-
-
 
 
 
