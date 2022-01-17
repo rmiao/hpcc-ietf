@@ -964,7 +964,12 @@ under heavy load.
     <section anchor = "sec-path"
 	 title = "Path migration">
     
-    <t> HPCC++ provides the information to switch paths once a path is congested or failed.</t>
+    <t> HPCC++ allows switches and end-hosts to share precise information of network utilization, which 
+    suggests a framework for path selection and rate control at end-hosts.
+    The framework HPCC++ enabled is to leverage each switch to report its link load information via &INT;.
+    The end-host fetches &INT; along the traffic routes and makes a timely and accurate 
+    decision on path selection and traffic admission.
+    </t>
 
   </section> 
 </section> 

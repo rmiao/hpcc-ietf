@@ -883,13 +883,13 @@ Internet-Draft                   HPCC++                     January 2021
 
 9.4.  Path migration
 
-   HPCC++ provides the information to switch paths once a path is
-   congested or failed.
-
-
-
-
-
+   HPCC++ allows switches and end-hosts to share precise information of
+   network utilization, which suggests a framework for path selection
+   and rate control at end-hosts.  The framework HPCC++ enabled is to
+   leverage each switch to report its link load information via inband
+   telemetry.  The end-host fetches inband telemetry along the traffic
+   routes and makes a timely and accurate decision on path selection and
+   traffic admission.
 
 
 
