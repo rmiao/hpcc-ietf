@@ -244,7 +244,7 @@ easy to deploy in hardware, implementable with commodity NICs and switches.</t>
 
     <t> Note that
     there also exist network nodes along the reverse (potentially uncongested)
-    path that the RTCP feedback reports traverse. Those network nodes are not
+    path that the feedback reports traverse. Those network nodes are not
     shown in the figure for sake of brevity.</t>
 
 
@@ -485,31 +485,10 @@ but just cannot maintain zero queues.
 
 
 
-
-<section anchor = "sec-implementation"
-	 title = "Design enhancement and implementation">
-
-<t>
-The basic design of HPCC++, i.e. HPCC, as described above is to add &INT; information
-into every data packet to react to congestion as soon as the very first packet
-observing the network congestion. This is especially helpful to reduce the risk
-of severe congestion in incast scenarios at the first round-trip time. In addition, 
-original HPCC's algorithm introduction of Wc is for the purpose of solving 
-the over-reaction issue from using this per-packet response. </t>
-
-
-<t>Alternatively, the &INT; information needs not to be added to every data packet to reduce
-the overhead. Switches can attach &INT; less frequently, e.g., once per RTT or upon 
-congestion occurance. </t>
-
-<t>There are three compoments we need to implement: telementry padding, congestion notification, and congestion control at NICs.</t>
-
-
-<section anchor = "sec-guideline"
+<!-- <section anchor = "sec-guideline"
 	 title = "HPCC++ Guidelines">
 <t>
-To ensure network stability, HPCC++ establishes a few
-guidelines for different implementations:</t>
+To ensure network stability, HPCC++ establishes a few guidelines for choosing implementations:</t>
 
  <t><list style="symbols">
   <t>The algorithm should commit the window/rate update at most once per round-trip time, 
@@ -519,31 +498,22 @@ guidelines for different implementations:</t>
      incorporate mechanisms to speed up the fairness convergence. </t>
 
 
-  <t>The switch should capture &INT; information that includes link load (txBytes, qlen, ts) and 
-     link spec (switch_ID, port_ID, B) at the egress port.
-     Note, each switch should record all those information at the single snapshot to achieve a precise link load
-     estimate.</t>
 
   <t> HPCC++ can use a probe packet to query the &INT; information. Thereby, the probe packets should take the same routing path and QoS queueing with the data packets. </t>
 </list> </t>
+</section> -->
 
-<!-- <t> As long the above guidelines are met, this document does not
-   mandate a particular &INT; header format or encapsulation,
-   which are orthogonal to the HPCC++ algorithm
-   described in this document. The algorithm can be implemented with a choice
-   of inband telemetry protocols, such as in-band network telemetry <xref target="P4-INT"></xref>, IOAM <xref target="I-D.ietf-ippm-ioam-data"></xref>,
-  IFA <xref target="I-D.ietf-kumar-ippm-ifa"></xref> and others. 
-  In fact, the emerging inband telemetry protocols can inform the evolution for a broader range of protocols and network functions, 
-  where this document leverages the trend to propose the architecture change to support HPCC++ algorithm.
- </t> -->
+<section anchor = "sec-implementation"
+	 title = "Design enhancement and implementation">
 
-</section>
+<t>There are three compoments HPCC++ needs to implement: telementry padding, congestion notification, and rate update.</t>
 
 
-<!--Once per burst of packets or once per window might be sufficient
-for rate calculations in capacity-limited NICs. But the algorithm should commit 
-the window/rate update at most once per round-trip time, similar with the procedure of 
-updating Wc.</t> -->
+
+
+
+
+
 
 <!--
 <section anchor = "subsec-int"
@@ -580,25 +550,32 @@ is used in the network.
 <section anchor = "sec-implementation-telemery"
 	 title ="Inband telemetry padding at the network switches">
    <t>HPCC++ only relies on packets to share information across senders,
-   receivers, and switches. HPCC++ is open to a variety of inband telemetry format standards.
-   Inside a data center, the path length is often no more than 5 hops. 
+   receivers, and switches. 
+   The switch should capture &INT; information that includes link load (txBytes, qlen, ts) and 
+    link spec (switch_ID, port_ID, B) at the egress port.
+    Note, each switch should record all those information at the single snapshot to achieve a precise link load
+    estimate. Inside a data center, the path length is often no more than 5 hops. 
    The overhead of the inband telemetry padding for HPCC++ is considered to be low.</t>
 
-  <t> As long the above guidelines are met, this document does not
-   mandate a particular &INT; header format or encapsulation,
-   which are orthogonal to the HPCC++ algorithm
-   described in this document. The algorithm can be implemented with a choice
-   of inband telemetry protocols, such as in-band network telemetry <xref target="P4-INT"></xref>, IOAM <xref target="I-D.ietf-ippm-ioam-data"></xref>,
-  IFA <xref target="I-D.ietf-kumar-ippm-ifa"></xref> and others. 
-  In fact, the emerging inband telemetry protocols can inform the evolution for a broader range of protocols and network functions, 
-  where this document leverages the trend to propose the architecture change to support HPCC++ algorithm.
 
-  Here we provide three concrete formats to implement inband telemetry.
+  <t> As long the above algorithm is met, HPCC++ is open to a variety of inband telemetry format standards, 
+  which are orthogonal to the HPCC++ algorithm. 
+  Although this document does not mandate a particular &INT; header format or encapsulation, 
+  we provide concrete implementation specifications using strandard inband telemetry protocols, 
+  including IFA <xref target="I-D.ietf-kumar-ippm-ifa"></xref>, IETF IOAM <xref target="I-D.ietf-ippm-ioam-data"></xref>,
+  and P4.org INT <xref target="P4-INT"></xref>. 
+  In fact, the emerging inband telemetry protocols inform the evolution for a broader range of protocols and network functions, 
+  where this document leverages the trend to propose the architecture change to support in-network functions like congestion control with high efficiency.
   </t>
 
+
   <section anchor = "sec-implementation-ifa"
-	 title ="Inband telemetry on IFA">
+	 title ="Inband telemetry on IFA2.0">
    <t>IFA</t>
+   <t>
+   To be added.
+   </t>
+
    </section>
 
 
@@ -610,6 +587,51 @@ is used in the network.
   <section anchor = "sec-implementation-p4"
 	 title ="Inband telemetry on P4">
    <t>P4</t>
+
+     <t><figure anchor="fig-p4int"
+               title=".">
+   <artwork><![CDATA[
+
+    0                   1                   2                   3
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |  nHop |        pathID         |          Padding              |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   | Speed |                    Timestamp                  |txBytes|
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |      txBytes(lower)           |         Queue Length          |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                            2nd Hop                            |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                            2nd Hop(lower)                     |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                    Options                    |    Padding    |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+                      Example P4.org INT header
+
+
+  ]]></artwork>
+          </figure></t>
+
+  <t><xref target="fig-p4int"></xref> shows the packet format of the
+INT padding after UDP header. 
+The field nHop is the hop count of the packet's path. The field pathID is the XOR of all the switch
+IDs (which are 12 bits) along the path. The sender sets nHop and
+pathID to 0. Each switch along the path adds nHop by 1, and XORs
+its own switch ID to the pathID. The sender uses pathID to judge
+whether the path of the flow has been changed. If so, it throws away
+the existing status records of the flow and builds up new records.
+
+Each switch has an 8-byte field to record the status of the egress
+port of the packet when the packet is emitted. B is a enum type
+which indicates the speed type of the port(e.g. 40Gbps, 100Gbps, etc.). 
+Timestamp (24 bits) is when the packet is emitted from its egress port,
+txBytes (20 bits) is the accumulative total bytes sent from the egress port,
+and Queue length (16 bits) is the current queue length of the egress port.
+</t>
+
+
    </section>
 
    
@@ -619,18 +641,77 @@ is used in the network.
   <section anchor = "sec-notification"
     title = "Congestion Notification">
 
-    <t>HPCC++ uses either inband ACK mechanism or separate probing packet for congestion notification. </t>
+<t> HPCC++ uses congestion notification to fetch network congestion information from switches 
+for proper rate updates at end-hosts. 
+Although the basic algorithm described in <xref target="subsec-receiver-algorithm"></xref> is to add &INT; information
+into every data packet for optimal performance, HPCC++ supports flexible implementation choices to work seamly with transport protocol stacks.
+We consider congestion nofication choices in both forward and reverse directions of the traffic.
+</t>
 
-      <section anchor = "sec-notification-inband"
-	      title ="Using ACK packet">
-      <t>inbound: TCP option or UDP header</t>
+  <section anchor = "sec-notification-inband"
+    title ="Forward direction Congestion detection">
+  <t>
+  Forward direction is the traffic direction of data packets that experience bandwidth contention and possible network congestion.
+  The function of congestion notification in forward direction is to fetch &INT; from switches. 
+  HPCC++ defines two approaches of doing this. </t>
+
+  <t>1. Inband with data packet.</t>
+
+  <t>This is basic algorithm setting described in <xref target="subsec-receiver-algorithm"></xref>,
+  where the end-host inserts inband telemetry header into data packets. Switches along the path detect the inband telemetry header 
+  and correspondingly add &INT; information into data packet to react to congestion as soon as the very first packet
+  observing the network congestion. This is especially helpful to reduce the risk
+  of severe congestion in incast scenarios at the first round-trip time. In addition, 
+  original HPCC's algorithm introduction of Wc is for the purpose of solving 
+  the over-reaction issue from using this per-packet response. 
+  
+  Different with in <xref target="subsec-receiver-algorithm"></xref>, end-host can choice uses every data packet or only a subset of data
+  packets to reduce the overhead. To insert telemetry header, differet telemetry protocols have specific settings for IFA, IETF IOAM, and P4.org INT as following.
+  </t>
+  
+  <t>2. Probe packet. </t>
+
+  <t>
+  Switches touching every data packet for &INT; inserting may lead to security or performance concerns, HPCC++ supports 
+  the ``out-of-band'' approach that uses special-generated probe packets at end-hosts to fetch &INT; from switches.
+  Thereby, the probe packets should take the same routing path and QoS queueing with the data packets.
+
+  End-hosts can generate probe packets less frequently and we recommend once per round trip time. 
+  In addition, the end-host issues probe packets only when it has data packet in the flight.
+  
+  </t>
       </section>
 
       <section anchor = "sec-notification-probing"
-	      title ="Using probing packet">
-      <t>probing packet</t>
+	      title ="Reverse direction">
+      <t>
+      Reverse direction is the receiver conveying &INT; back to traffic sender for rate updates. 
+      Similar to forward direction, there are also inband and out-of-band approaches.
+      </t>
+
+      <t>
+      1. Inband with ACK packet.</t>
+
+      <t>
+      HPCC++ supports to use the ACK packet in transport protocols to convey the &INT;. 
+      TCP generates ACK packet once per every data packet or per a few data packets. 
+      With ACK packet, the receive sends accumulated &INT; back to sender for rate updates.
+      </t>
+
+      <t>2. Notification packet.</t>
+
+      <t>
+      Using ACK packet for &INT; notification requires transport stack modification 
+      and sometimes leads to delay in notification when certain delayed acknowledged mechanism is used.
+      Hence, HPCC++ allows the receiver to use special-generated notification packets to deliver &INT;.
+      The nofication packet is generated per each probe packet or data packet with &INT;.
+      </t>
+
       </section>
+
+
   </section>
+
 
 <section anchor = "sec-implementation-cc"
 	 title ="Congestion control at NICs">
@@ -768,14 +849,27 @@ under heavy load.
     <section anchor = "sec-reference-roce"
       title = "Implementation on RDMA RoCEv2">
         <t>
-       We describe reference implementation on RDMA RoCEv2. 
-    </t>
+       We describe reference implementation on RDMA RoCEv2. </t>
+
+        <t>1. Probe packets.</t>
+
+        <t>HPCC++ reuses the MAD packet as probe packets to fetch &INT;.</t>
+
+        <t>2. Receiver side pre-processing</t>
+
+
+        <t>3. Sender side pre-processing</t>
+
+
+    
     </section>
 
     <section anchor = "sec-reference-tcp"
       title = "Implementation on TCP">
       <t>
-       We describe reference implementation on RDMA RoCEv2. 
+       We describe reference implementation on IETF TCP.
+
+       To be added. 
     </t>
     </section>
   </section>
