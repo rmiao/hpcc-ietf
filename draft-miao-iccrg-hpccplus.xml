@@ -571,42 +571,44 @@ is used in the network.
 
   <section anchor = "sec-implementation-ifa"
 	 title ="Inband telemetry on IFA2.0">
-   <t>IFA</t>
+   <t>For more details, please refer to IFA <xref target="I-D.ietf-kumar-ippm-ifa"></xref></t>
    
-    <t><figure anchor="fig-ifa-header"
-               title=".">
+    <!-- <t><figure anchor="fig-ifa-header"
+               title="Example IFA header">
    <artwork><![CDATA[
 
     0                   1                   2                   3
     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |Version|Global |               |   Flags       |               |  
-   |       |Name   | Next Header   |               |   Max Length  |
-   |       |Space  |               |               |               |
+   |          deviceID                                         | SP|
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   
-
-                      Example IFA header
-
+   | Speed |                    Timestamp                  |txBytes|
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |      txBytes(lower)           |         Queue Length          |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                            2nd Hop                            |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                            2nd Hop(lower)                     |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                    Options                    |    Padding    |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
   ]]></artwork>
           </figure></t>
-   
-
+   -->
    </section>
 
 
   <section anchor = "sec-implementation-ioam"
 	 title ="Inband telemetry on IOAM">
-   <t>IOAM</t>
+   <t>Please refer to IETF IOAM <xref target="I-D.ietf-ippm-ioam-data"></xref></t>
    </section>
 
   <section anchor = "sec-implementation-p4"
 	 title ="Inband telemetry on P4">
-   <t>P4</t>
 
      <t><figure anchor="fig-p4int"
-               title=".">
+               title="Example P4.org INT header">
    <artwork><![CDATA[
 
     0                   1                   2                   3
@@ -624,9 +626,6 @@ is used in the network.
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    |                    Options                    |    Padding    |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-                      Example P4.org INT header
-
 
   ]]></artwork>
           </figure></t>
@@ -865,20 +864,18 @@ under heavy load.
 
     <section anchor = "sec-reference-roce"
       title = "Implementation on RDMA RoCEv2">
-        <t>
-       We describe reference implementation on RDMA RoCEv2. </t>
-
-        <t>1. Probe packets.</t>
-
-        <t>HPCC++ reuses the MAD packet as probe packets to fetch &INT;.</t>
-
-        <t>2. Receiver side pre-processing</t>
-
-
-        <t>3. Sender side pre-processing</t>
-
-
+        <t> 
+      
+       We describe reference implementation on RDMA RoCEv2.
+      This is an implementation for ``Sender-based HPCC++'' (see section 6.3.1.) using dedicated probe packets to collect the telemetry.
+      HPCC++ module in the sender triggers the sending of ``telemetry request packet'' for a given flow. The NIC then sends the probe packet. 
+      The packet will have the same IP and UDP headers as the data packets of the given flow. Such packet is expected to be sent every RTT, see section 6 for more details.  
+      On receiving of telemetry request packet, the NIC extracts the telemetry from all the links along the path from the sender.
+       HPCC++ module chooses the link with the highest inflight bytes and sends its telemetry (queue length, timestamp and tx bytes) back to the receiver on top of dedicated ``telemetry response packet''.
+      On receiving of telemetry response packet, the NIC extracts the telemetry and pass it to the HPCC++ module which using this info to implement the rate update scheme.
     
+      </t>
+
     </section>
 
     <section anchor = "sec-reference-tcp"

@@ -92,16 +92,16 @@ Table of Contents
    6.  Design enhancement and implementation . . . . . . . . . . . .   9
      6.1.  Inband telemetry padding at the network switches  . . . .   9
        6.1.1.  Inband telemetry on IFA2.0  . . . . . . . . . . . . .   9
-       6.1.2.  Inband telemetry on IOAM  . . . . . . . . . . . . . .  10
-       6.1.3.  Inband telemetry on P4  . . . . . . . . . . . . . . .  10
-     6.2.  Congestion Notification . . . . . . . . . . . . . . . . .  11
+       6.1.2.  Inband telemetry on IOAM  . . . . . . . . . . . . . .   9
+       6.1.3.  Inband telemetry on P4  . . . . . . . . . . . . . . .   9
+     6.2.  Congestion Notification . . . . . . . . . . . . . . . . .  10
        6.2.1.  Forward direction Congestion detection  . . . . . . .  11
-       6.2.2.  Reverse direction . . . . . . . . . . . . . . . . . .  12
+       6.2.2.  Reverse direction . . . . . . . . . . . . . . . . . .  11
      6.3.  Congestion control at NICs  . . . . . . . . . . . . . . .  12
        6.3.1.  Sender-based HPCC . . . . . . . . . . . . . . . . . .  12
        6.3.2.  Receiver-based HPCC . . . . . . . . . . . . . . . . .  13
    7.  Reference Implementation  . . . . . . . . . . . . . . . . . .  14
-     7.1.  Implementation on RDMA RoCEv2 . . . . . . . . . . . . . .  15
+     7.1.  Implementation on RDMA RoCEv2 . . . . . . . . . . . . . .  14
      7.2.  Implementation on TCP . . . . . . . . . . . . . . . . . .  15
    8.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  15
    9.  Discussion  . . . . . . . . . . . . . . . . . . . . . . . . .  15
@@ -115,7 +115,7 @@ Internet-Draft                   HPCC++                       March 2021
 
 
      9.2.  Switch-assisted congestion control  . . . . . . . . . . .  16
-     9.3.  Work with QoS queuing . . . . . . . . . . . . . . . . . .  17
+     9.3.  Work with QoS queuing . . . . . . . . . . . . . . . . . .  16
      9.4.  Path migration  . . . . . . . . . . . . . . . . . . . . .  17
    10. Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .  17
    11. Contributors  . . . . . . . . . . . . . . . . . . . . . . . .  17
@@ -480,23 +480,23 @@ Internet-Draft                   HPCC++                       March 2021
 
 6.1.1.  Inband telemetry on IFA2.0
 
-   IFA
+   For more details, please refer to IFA [I-D.ietf-kumar-ippm-ifa]
 
+6.1.2.  Inband telemetry on IOAM
 
-       0                   1                   2                   3
-       0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-      |Version|Global |               |   Flags       |               |
-      |       |Name   | Next Header   |               |   Max Length  |
-      |       |Space  |               |               |               |
-      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   Please refer to IETF IOAM [I-D.ietf-ippm-ioam-data]
 
-
-                         Example IFA header
+6.1.3.  Inband telemetry on P4
 
 
 
-                                Figure 4: .
+
+
+
+
+
+
+
 
 
 
@@ -504,15 +504,6 @@ Internet-Draft                   HPCC++                       March 2021
 Miao, et al.            Expires September 8, 2022               [Page 9]
 
 Internet-Draft                   HPCC++                       March 2021
-
-
-6.1.2.  Inband telemetry on IOAM
-
-   IOAM
-
-6.1.3.  Inband telemetry on P4
-
-   P4
 
 
        0                   1                   2                   3
@@ -531,13 +522,10 @@ Internet-Draft                   HPCC++                       March 2021
       |                    Options                    |    Padding    |
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-                         Example P4.org INT header
 
+                    Figure 4: Example P4.org INT header
 
-
-                                Figure 5: .
-
-   Figure 5 shows the packet format of the INT padding after UDP header.
+   Figure 4 shows the packet format of the INT padding after UDP header.
    The field nHop is the hop count of the packet's path.  The field
    pathID is the XOR of all the switch IDs (which are 12 bits) along the
    path.  The sender sets nHop and pathID to 0.  Each switch along the
@@ -552,16 +540,6 @@ Internet-Draft                   HPCC++                       March 2021
    accumulative total bytes sent from the egress port, and Queue length
    (16 bits) is the current queue length of the egress port.
 
-
-
-
-
-
-Miao, et al.            Expires September 8, 2022              [Page 10]
-
-Internet-Draft                   HPCC++                       March 2021
-
-
 6.2.  Congestion Notification
 
    HPCC++ uses congestion notification to fetch network congestion
@@ -571,6 +549,18 @@ Internet-Draft                   HPCC++                       March 2021
    HPCC++ supports flexible implementation choices to work seamly with
    transport protocol stacks.  We consider congestion nofication choices
    in both forward and reverse directions of the traffic.
+
+
+
+
+
+
+
+
+Miao, et al.            Expires September 8, 2022              [Page 10]
+
+Internet-Draft                   HPCC++                       March 2021
+
 
 6.2.1.  Forward direction Congestion detection
 
@@ -609,15 +599,6 @@ Internet-Draft                   HPCC++                       March 2021
    the end-host issues probe packets only when it has data packet in the
    flight.
 
-
-
-
-
-Miao, et al.            Expires September 8, 2022              [Page 11]
-
-Internet-Draft                   HPCC++                       March 2021
-
-
 6.2.2.  Reverse direction
 
    Reverse direction is the receiver conveying inband telemetry back to
@@ -628,6 +609,15 @@ Internet-Draft                   HPCC++                       March 2021
 
    HPCC++ supports to use the ACK packet in transport protocols to
    convey the inband telemetry.  TCP generates ACK packet once per every
+
+
+
+
+Miao, et al.            Expires September 8, 2022              [Page 11]
+
+Internet-Draft                   HPCC++                       March 2021
+
+
    data packet or per a few data packets.  With ACK packet, the receive
    sends accumulated inband telemetry back to sender for rate updates.
 
@@ -644,7 +634,7 @@ Internet-Draft                   HPCC++                       March 2021
 
 6.3.1.  Sender-based HPCC
 
-   Figure 6 shows HPCC++ implementation on a NIC.  The NIC provides an
+   Figure 5 shows HPCC++ implementation on a NIC.  The NIC provides an
    HPCC++ module that resides on the data path of the NIC, HPCC++
    modules realize both sender and receiver roles.
 
@@ -662,17 +652,9 @@ Internet-Draft                   HPCC++                       March 2021
   +------------------------------------------------------------------+
 
 
-                 Figure 6: Overview of NIC Implementation
+                 Figure 5: Overview of NIC Implementation
 
    1.  Sender side flow
-
-
-
-
-Miao, et al.            Expires September 8, 2022              [Page 12]
-
-Internet-Draft                   HPCC++                       March 2021
-
 
    The HPCC++ module running the HPCC CC algorithm in the sender side
    for every flow in the NIC.  Flow can be defined by some transport
@@ -684,6 +666,14 @@ Internet-Draft                   HPCC++                       March 2021
    The scheduler contains a pacing mechanism that determine the flow
    rate by the value it got from the algorithm.  It also maintains the
    current sending window size for active flows.  If the pacing
+
+
+
+Miao, et al.            Expires September 8, 2022              [Page 12]
+
+Internet-Draft                   HPCC++                       March 2021
+
+
    mechanism and the flow's sending window permits, the scheduler
    invokes for the flow a PktSend command to TX pipeline.
 
@@ -722,14 +712,6 @@ Internet-Draft                   HPCC++                       March 2021
    packets need to carry the inband telemetry information.  To reduce
    the Packet Per Second (PPS) overhead, the receiver may examine the
    inband telemetry information and adopt the technique of delayed ACKs
-
-
-
-Miao, et al.            Expires September 8, 2022              [Page 13]
-
-Internet-Draft                   HPCC++                       March 2021
-
-
    that only sends out an ACK for a few of received packets.  In order
    to reduce PPS even further, one may implement the algorithm at the
    receiver and feedback the calculated window in the ACK packet once
@@ -739,6 +721,14 @@ Internet-Draft                   HPCC++                       March 2021
    the inband telemetry information in the packet header.  The receiver
    performs the same functions except using int.L instead of ack.L.  The
    new function NewINT(int.L) is to replace NewACK(int.L)
+
+
+
+
+Miao, et al.            Expires September 8, 2022              [Page 13]
+
+Internet-Draft                   HPCC++                       March 2021
+
 
    28:   Procedure NewINT(int.L)
    29:   if now > (lastUpdateTime + T) then
@@ -774,10 +764,20 @@ Internet-Draft                   HPCC++                       March 2021
    to be done to enforce the window limit and collect congestion
    feedback via probing packets, which is incremental.
 
+7.1.  Implementation on RDMA RoCEv2
 
-
-
-
+   We describe reference implementation on RDMA RoCEv2.  This is an
+   implementation for ``Sender-based HPCC++'' (see section 6.3.1.) using
+   dedicated probe packets to collect the telemetry.  HPCC++ module in
+   the sender triggers the sending of ``telemetry request packet'' for a
+   given flow.  The NIC then sends the probe packet.  The packet will
+   have the same IP and UDP headers as the data packets of the given
+   flow.  Such packet is expected to be sent every RTT, see section 6
+   for more details.  On receiving of telemetry request packet, the NIC
+   extracts the telemetry from all the links along the path from the
+   sender.  HPCC++ module chooses the link with the highest inflight
+   bytes and sends its telemetry (queue length, timestamp and tx bytes)
+   back to the receiver on top of dedicated ``telemetry response
 
 
 
@@ -786,18 +786,9 @@ Miao, et al.            Expires September 8, 2022              [Page 14]
 Internet-Draft                   HPCC++                       March 2021
 
 
-7.1.  Implementation on RDMA RoCEv2
-
-   We describe reference implementation on RDMA RoCEv2.
-
-   1.  Probe packets.
-
-   HPCC++ reuses the MAD packet as probe packets to fetch inband
-   telemetry.
-
-   2.  Receiver side pre-processing
-
-   3.  Sender side pre-processing
+   packet''.  On receiving of telemetry response packet, the NIC
+   extracts the telemetry and pass it to the HPCC++ module which using
+   this info to implement the rate update scheme.
 
 7.2.  Implementation on TCP
 
@@ -834,14 +825,6 @@ Internet-Draft                   HPCC++                       March 2021
    There may rise privacy concern when the telemetry information is
    conveyed across Autonomous Systems (ASes) and back to end-users.  The
    link load information captured in telemetry can potentially reveal
-
-
-
-Miao, et al.            Expires September 8, 2022              [Page 15]
-
-Internet-Draft                   HPCC++                       March 2021
-
-
    the provider's network capacity, route utilization, scheduling
    policy, etc.  Those usually are considered to be sensitive data of
    the network providers.  Hence, certain action may take to anonymize
@@ -851,6 +834,14 @@ Internet-Draft                   HPCC++                       March 2021
    Another consideration is the security of receiving telemetry
    information.  The rate adaptation mechanism in HPCC++ relies on
    feedback from the network.  As such, it is vulnerable to attacks
+
+
+
+Miao, et al.            Expires September 8, 2022              [Page 15]
+
+Internet-Draft                   HPCC++                       March 2021
+
+
    where feedback messages are hijacked, replaced, or intentionally
    injected with misleading information resulting in denial of service,
    similar to those that can affect TCP.  It is therefore RECOMMENDED
@@ -890,14 +881,6 @@ Internet-Draft                   HPCC++                       March 2021
 
    o  Last, HPCC++ uses TX rate instead of RX rate used by XCP and RCP.
       As detailed in [SIGCOMM-HPCC], we view the TX rate is more precise
-
-
-
-Miao, et al.            Expires September 8, 2022              [Page 16]
-
-Internet-Draft                   HPCC++                       March 2021
-
-
       because RX rate and queue length are overlapped and thus it causes
       oscillation.
 
@@ -907,6 +890,14 @@ Internet-Draft                   HPCC++                       March 2021
    switches, the length of flow's own queue cannot tell the actual
    queuing time and the exact extent of congestion.  Although general
    approaches for running congestion control with QoS queuing are out of
+
+
+
+Miao, et al.            Expires September 8, 2022              [Page 16]
+
+Internet-Draft                   HPCC++                       March 2021
+
+
    the scope of this document, we provide a few hints for HPCC++ running
    friendly with QoS queuing.  In this case, HPCC++ can leverage the
    packet sojourn time (the egress timestamp minus the ingress
@@ -943,6 +934,15 @@ Internet-Draft                   HPCC++                       March 2021
 
 12.1.  Normative References
 
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119,
+              DOI 10.17487/RFC2119, March 1997,
+              <https://www.rfc-editor.org/info/rfc2119>.
+
+   [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
+              2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
+              May 2017, <https://www.rfc-editor.org/info/rfc8174>.
+
 
 
 
@@ -953,15 +953,6 @@ Miao, et al.            Expires September 8, 2022              [Page 17]
 
 Internet-Draft                   HPCC++                       March 2021
 
-
-   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
-              Requirement Levels", BCP 14, RFC 2119,
-              DOI 10.17487/RFC2119, March 1997,
-              <https://www.rfc-editor.org/info/rfc2119>.
-
-   [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
-              2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
-              May 2017, <https://www.rfc-editor.org/info/rfc8174>.
 
 12.2.  Informative References
 
@@ -1000,6 +991,15 @@ Internet-Draft                   HPCC++                       March 2021
               Yu, "HPCC: High Precision Congestion Control", ACM
               SIGCOMM Beijing, China, August 2019.
 
+   [Zhu-SIGCOMM2015]
+              Zhu, Y., Eran, H., Firestone, D., Guo, C., Lipshteyn, M.,
+              Liron, Y., Padhye, J., Raindel, S., Yahia, M., and M.
+              Zhang, "Congestion Control for Large-Scale RDMA
+              Deployments", ACM SIGCOMM London, United Kingdom, August
+              2015.
+
+
+
 
 
 
@@ -1009,13 +1009,6 @@ Miao, et al.            Expires September 8, 2022              [Page 18]
 
 Internet-Draft                   HPCC++                       March 2021
 
-
-   [Zhu-SIGCOMM2015]
-              Zhu, Y., Eran, H., Firestone, D., Guo, C., Lipshteyn, M.,
-              Liron, Y., Padhye, J., Raindel, S., Yahia, M., and M.
-              Zhang, "Congestion Control for Large-Scale RDMA
-              Deployments", ACM SIGCOMM London, United Kingdom, August
-              2015.
 
 Authors' Addresses
 
@@ -1055,6 +1048,13 @@ Authors' Addresses
    Email: jk.lee@intel.com
 
 
+   Changhoon Kim
+   Intel Corporation
+   4750 Patrick Henry Dr.
+   Santa Clara, CA  95054
+   USA
+
+   Email: chang.kim@intel.com
 
 
 
@@ -1064,15 +1064,6 @@ Authors' Addresses
 Miao, et al.            Expires September 8, 2022              [Page 19]
 
 Internet-Draft                   HPCC++                       March 2021
-
-
-   Changhoon Kim
-   Intel Corporation
-   4750 Patrick Henry Dr.
-   Santa Clara, CA  95054
-   USA
-
-   Email: chang.kim@intel.com
 
 
    Barak Gafni
@@ -1100,6 +1091,15 @@ Internet-Draft                   HPCC++                       March 2021
    USA
 
    Email: jefftantsura@microsoft.com
+
+
+
+
+
+
+
+
+
 
 
 
