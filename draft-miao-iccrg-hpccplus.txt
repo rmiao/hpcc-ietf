@@ -5,7 +5,7 @@
 Network Working Group                                            R. Miao
 Internet-Draft                                                    H. Liu
 Intended status: Experimental                              Alibaba Group
-Expires: July 20, 2022                                            R. Pan
+Expires: September 8, 2022                                        R. Pan
                                                                   J. Lee
                                                                   C. Kim
                                                        Intel Corporation
@@ -14,7 +14,7 @@ Expires: July 20, 2022                                            R. Pan
                                              Mellanox Technologies, Inc.
                                                              J. Tantsura
                                                    Microsoft Corporation
-                                                        January 16, 2021
+                                                           March 7, 2021
 
 
            HPCC++: Enhanced High Precision Congestion Control
@@ -53,9 +53,9 @@ Status of This Memo
 
 
 
-Miao, et al.              Expires July 20, 2022                 [Page 1]
+Miao, et al.            Expires September 8, 2022               [Page 1]
 
-Internet-Draft                   HPCC++                     January 2021
+Internet-Draft                   HPCC++                       March 2021
 
 
    Internet-Drafts are draft documents valid for a maximum of six months
@@ -63,7 +63,7 @@ Internet-Draft                   HPCC++                     January 2021
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on July 20, 2022.
+   This Internet-Draft will expire on September 8, 2022.
 
 Copyright Notice
 
@@ -92,16 +92,16 @@ Table of Contents
    6.  Design enhancement and implementation . . . . . . . . . . . .   9
      6.1.  Inband telemetry padding at the network switches  . . . .   9
        6.1.1.  Inband telemetry on IFA2.0  . . . . . . . . . . . . .   9
-       6.1.2.  Inband telemetry on IOAM  . . . . . . . . . . . . . .   9
-       6.1.3.  Inband telemetry on P4  . . . . . . . . . . . . . . .   9
-     6.2.  Congestion Notification . . . . . . . . . . . . . . . . .  10
+       6.1.2.  Inband telemetry on IOAM  . . . . . . . . . . . . . .  10
+       6.1.3.  Inband telemetry on P4  . . . . . . . . . . . . . . .  10
+     6.2.  Congestion Notification . . . . . . . . . . . . . . . . .  11
        6.2.1.  Forward direction Congestion detection  . . . . . . .  11
-       6.2.2.  Reverse direction . . . . . . . . . . . . . . . . . .  11
+       6.2.2.  Reverse direction . . . . . . . . . . . . . . . . . .  12
      6.3.  Congestion control at NICs  . . . . . . . . . . . . . . .  12
        6.3.1.  Sender-based HPCC . . . . . . . . . . . . . . . . . .  12
        6.3.2.  Receiver-based HPCC . . . . . . . . . . . . . . . . .  13
    7.  Reference Implementation  . . . . . . . . . . . . . . . . . .  14
-     7.1.  Implementation on RDMA RoCEv2 . . . . . . . . . . . . . .  14
+     7.1.  Implementation on RDMA RoCEv2 . . . . . . . . . . . . . .  15
      7.2.  Implementation on TCP . . . . . . . . . . . . . . . . . .  15
    8.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  15
    9.  Discussion  . . . . . . . . . . . . . . . . . . . . . . . . .  15
@@ -109,20 +109,20 @@ Table of Contents
 
 
 
-Miao, et al.              Expires July 20, 2022                 [Page 2]
+Miao, et al.            Expires September 8, 2022               [Page 2]
 
-Internet-Draft                   HPCC++                     January 2021
+Internet-Draft                   HPCC++                       March 2021
 
 
-     9.2.  Switch-assisted congestion control  . . . . . . . . . . .  15
-     9.3.  Work with QoS queuing . . . . . . . . . . . . . . . . . .  16
-     9.4.  Path migration  . . . . . . . . . . . . . . . . . . . . .  16
+     9.2.  Switch-assisted congestion control  . . . . . . . . . . .  16
+     9.3.  Work with QoS queuing . . . . . . . . . . . . . . . . . .  17
+     9.4.  Path migration  . . . . . . . . . . . . . . . . . . . . .  17
    10. Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .  17
    11. Contributors  . . . . . . . . . . . . . . . . . . . . . . . .  17
    12. References  . . . . . . . . . . . . . . . . . . . . . . . . .  17
      12.1.  Normative References . . . . . . . . . . . . . . . . . .  17
-     12.2.  Informative References . . . . . . . . . . . . . . . . .  17
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  18
+     12.2.  Informative References . . . . . . . . . . . . . . . . .  18
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  19
 
 1.  Introduction
 
@@ -165,9 +165,9 @@ Internet-Draft                   HPCC++                     January 2021
 
 
 
-Miao, et al.              Expires July 20, 2022                 [Page 3]
+Miao, et al.            Expires September 8, 2022               [Page 3]
 
-Internet-Draft                   HPCC++                     January 2021
+Internet-Draft                   HPCC++                       March 2021
 
 
    design lays the foundation for inband telemetry based precision
@@ -221,9 +221,9 @@ Internet-Draft                   HPCC++                     January 2021
 
 
 
-Miao, et al.              Expires July 20, 2022                 [Page 4]
+Miao, et al.            Expires September 8, 2022               [Page 4]
 
-Internet-Draft                   HPCC++                     January 2021
+Internet-Draft                   HPCC++                       March 2021
 
 
     +---------+  pkt    +-------+ pkt+tlm +-------+ pkt+tlm +----------+
@@ -277,9 +277,9 @@ Internet-Draft                   HPCC++                     January 2021
 
 
 
-Miao, et al.              Expires July 20, 2022                 [Page 5]
+Miao, et al.            Expires September 8, 2022               [Page 5]
 
-Internet-Draft                   HPCC++                     January 2021
+Internet-Draft                   HPCC++                       March 2021
 
 
 4.1.  Notations
@@ -333,9 +333,9 @@ Internet-Draft                   HPCC++                     January 2021
 
 
 
-Miao, et al.              Expires July 20, 2022                 [Page 6]
+Miao, et al.            Expires September 8, 2022               [Page 6]
 
-Internet-Draft                   HPCC++                     January 2021
+Internet-Draft                   HPCC++                       March 2021
 
 
    1: Function MeasureInflight(ack)
@@ -389,9 +389,9 @@ Internet-Draft                   HPCC++                     January 2021
 
 
 
-Miao, et al.              Expires July 20, 2022                 [Page 7]
+Miao, et al.            Expires September 8, 2022               [Page 7]
 
-Internet-Draft                   HPCC++                     January 2021
+Internet-Draft                   HPCC++                       March 2021
 
 
    last accumulated transferred bytes txBytes and timestamp ts (Line 4).
@@ -445,9 +445,9 @@ Internet-Draft                   HPCC++                     January 2021
 
 
 
-Miao, et al.              Expires July 20, 2022                 [Page 8]
+Miao, et al.            Expires September 8, 2022               [Page 8]
 
-Internet-Draft                   HPCC++                     January 2021
+Internet-Draft                   HPCC++                       March 2021
 
 
 6.  Design enhancement and implementation
@@ -482,7 +482,29 @@ Internet-Draft                   HPCC++                     January 2021
 
    IFA
 
-   To be added.
+
+       0                   1                   2                   3
+       0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |Version|Global |               |   Flags       |               |
+      |       |Name   | Next Header   |               |   Max Length  |
+      |       |Space  |               |               |               |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+
+                         Example IFA header
+
+
+
+                                Figure 4: .
+
+
+
+
+Miao, et al.            Expires September 8, 2022               [Page 9]
+
+Internet-Draft                   HPCC++                       March 2021
+
 
 6.1.2.  Inband telemetry on IOAM
 
@@ -491,19 +513,6 @@ Internet-Draft                   HPCC++                     January 2021
 6.1.3.  Inband telemetry on P4
 
    P4
-
-
-
-
-
-
-
-
-
-
-Miao, et al.              Expires July 20, 2022                 [Page 9]
-
-Internet-Draft                   HPCC++                     January 2021
 
 
        0                   1                   2                   3
@@ -526,9 +535,9 @@ Internet-Draft                   HPCC++                     January 2021
 
 
 
-                                Figure 4: .
+                                Figure 5: .
 
-   Figure 4 shows the packet format of the INT padding after UDP header.
+   Figure 5 shows the packet format of the INT padding after UDP header.
    The field nHop is the hop count of the packet's path.  The field
    pathID is the XOR of all the switch IDs (which are 12 bits) along the
    path.  The sender sets nHop and pathID to 0.  Each switch along the
@@ -543,6 +552,16 @@ Internet-Draft                   HPCC++                     January 2021
    accumulative total bytes sent from the egress port, and Queue length
    (16 bits) is the current queue length of the egress port.
 
+
+
+
+
+
+Miao, et al.            Expires September 8, 2022              [Page 10]
+
+Internet-Draft                   HPCC++                       March 2021
+
+
 6.2.  Congestion Notification
 
    HPCC++ uses congestion notification to fetch network congestion
@@ -552,15 +571,6 @@ Internet-Draft                   HPCC++                     January 2021
    HPCC++ supports flexible implementation choices to work seamly with
    transport protocol stacks.  We consider congestion nofication choices
    in both forward and reverse directions of the traffic.
-
-
-
-
-
-Miao, et al.              Expires July 20, 2022                [Page 10]
-
-Internet-Draft                   HPCC++                     January 2021
-
 
 6.2.1.  Forward direction Congestion detection
 
@@ -599,6 +609,15 @@ Internet-Draft                   HPCC++                     January 2021
    the end-host issues probe packets only when it has data packet in the
    flight.
 
+
+
+
+
+Miao, et al.            Expires September 8, 2022              [Page 11]
+
+Internet-Draft                   HPCC++                       March 2021
+
+
 6.2.2.  Reverse direction
 
    Reverse direction is the receiver conveying inband telemetry back to
@@ -609,15 +628,6 @@ Internet-Draft                   HPCC++                     January 2021
 
    HPCC++ supports to use the ACK packet in transport protocols to
    convey the inband telemetry.  TCP generates ACK packet once per every
-
-
-
-
-Miao, et al.              Expires July 20, 2022                [Page 11]
-
-Internet-Draft                   HPCC++                     January 2021
-
-
    data packet or per a few data packets.  With ACK packet, the receive
    sends accumulated inband telemetry back to sender for rate updates.
 
@@ -634,7 +644,7 @@ Internet-Draft                   HPCC++                     January 2021
 
 6.3.1.  Sender-based HPCC
 
-   Figure 5 shows HPCC++ implementation on a NIC.  The NIC provides an
+   Figure 6 shows HPCC++ implementation on a NIC.  The NIC provides an
    HPCC++ module that resides on the data path of the NIC, HPCC++
    modules realize both sender and receiver roles.
 
@@ -652,9 +662,17 @@ Internet-Draft                   HPCC++                     January 2021
   +------------------------------------------------------------------+
 
 
-                 Figure 5: Overview of NIC Implementation
+                 Figure 6: Overview of NIC Implementation
 
    1.  Sender side flow
+
+
+
+
+Miao, et al.            Expires September 8, 2022              [Page 12]
+
+Internet-Draft                   HPCC++                       March 2021
+
 
    The HPCC++ module running the HPCC CC algorithm in the sender side
    for every flow in the NIC.  Flow can be defined by some transport
@@ -666,14 +684,6 @@ Internet-Draft                   HPCC++                     January 2021
    The scheduler contains a pacing mechanism that determine the flow
    rate by the value it got from the algorithm.  It also maintains the
    current sending window size for active flows.  If the pacing
-
-
-
-Miao, et al.              Expires July 20, 2022                [Page 12]
-
-Internet-Draft                   HPCC++                     January 2021
-
-
    mechanism and the flow's sending window permits, the scheduler
    invokes for the flow a PktSend command to TX pipeline.
 
@@ -712,6 +722,14 @@ Internet-Draft                   HPCC++                     January 2021
    packets need to carry the inband telemetry information.  To reduce
    the Packet Per Second (PPS) overhead, the receiver may examine the
    inband telemetry information and adopt the technique of delayed ACKs
+
+
+
+Miao, et al.            Expires September 8, 2022              [Page 13]
+
+Internet-Draft                   HPCC++                       March 2021
+
+
    that only sends out an ACK for a few of received packets.  In order
    to reduce PPS even further, one may implement the algorithm at the
    receiver and feedback the calculated window in the ACK packet once
@@ -721,14 +739,6 @@ Internet-Draft                   HPCC++                     January 2021
    the inband telemetry information in the packet header.  The receiver
    performs the same functions except using int.L instead of ack.L.  The
    new function NewINT(int.L) is to replace NewACK(int.L)
-
-
-
-
-Miao, et al.              Expires July 20, 2022                [Page 13]
-
-Internet-Draft                   HPCC++                     January 2021
-
 
    28:   Procedure NewINT(int.L)
    29:   if now > (lastUpdateTime + T) then
@@ -764,6 +774,18 @@ Internet-Draft                   HPCC++                     January 2021
    to be done to enforce the window limit and collect congestion
    feedback via probing packets, which is incremental.
 
+
+
+
+
+
+
+
+Miao, et al.            Expires September 8, 2022              [Page 14]
+
+Internet-Draft                   HPCC++                       March 2021
+
+
 7.1.  Implementation on RDMA RoCEv2
 
    We describe reference implementation on RDMA RoCEv2.
@@ -777,18 +799,25 @@ Internet-Draft                   HPCC++                     January 2021
 
    3.  Sender side pre-processing
 
-
-
-
-
-Miao, et al.              Expires July 20, 2022                [Page 14]
-
-Internet-Draft                   HPCC++                     January 2021
-
-
 7.2.  Implementation on TCP
 
-   We describe reference implementation on IETF TCP.  To be added.
+   Taking the benefit of precise congestion control for TCP is a natural
+   next step.  Since TCP segmentation at TX side (e.g., TSO) and
+   coalescing at RX side (e.g., GRO) happen at the NIC HW or low-layer
+   of TCP/IP stack, carrying per-pkt inband telemetry info between the
+   TCP congestion control engine and network fabric has to work with the
+   TSO and GRO.  Instead, one way to adopt HPCC++ for TCP is using the
+   special probe and notification packets to retrieve inband telemetry
+   information.  The sender generates a probe packet when it is actively
+   sending data.  The probe packet has the same 5-tuples (source and
+   destination addresses, source and destination ports and protocol
+   number) with the data packets and the inband telemetry header.  The
+   switches along the path identify the probe packet by its inband
+   telemetry header and insert the inband telemetry.  Once received the
+   probe packet with inband telemetry, the receiver replies with a
+   response packet piggybacking the inband telemetry to the sender.
+   Note, both probe and response packets use a special DSCP number so
+   that it can bypass the TSO and GRO in each side.
 
 8.  IANA Considerations
 
@@ -805,6 +834,14 @@ Internet-Draft                   HPCC++                     January 2021
    There may rise privacy concern when the telemetry information is
    conveyed across Autonomous Systems (ASes) and back to end-users.  The
    link load information captured in telemetry can potentially reveal
+
+
+
+Miao, et al.            Expires September 8, 2022              [Page 15]
+
+Internet-Draft                   HPCC++                       March 2021
+
+
    the provider's network capacity, route utilization, scheduling
    policy, etc.  Those usually are considered to be sensitive data of
    the network providers.  Hence, certain action may take to anonymize
@@ -833,15 +870,6 @@ Internet-Draft                   HPCC++                     January 2021
       already been supported by telemetry protocols like INT [P4-INT] or
       IOAM [I-D.ietf-ippm-ioam-data].  Please note that this is very
       different from dual-mode algorithms such as XCP
-
-
-
-
-Miao, et al.              Expires July 20, 2022                [Page 15]
-
-Internet-Draft                   HPCC++                     January 2021
-
-
       [Katabi-SIGCOMM2002] and RCP [Dukkipati-RCP], where switches take
       an actively role in determining flows' rates.
 
@@ -862,6 +890,14 @@ Internet-Draft                   HPCC++                     January 2021
 
    o  Last, HPCC++ uses TX rate instead of RX rate used by XCP and RCP.
       As detailed in [SIGCOMM-HPCC], we view the TX rate is more precise
+
+
+
+Miao, et al.            Expires September 8, 2022              [Page 16]
+
+Internet-Draft                   HPCC++                       March 2021
+
+
       because RX rate and queue length are overlapped and thus it causes
       oscillation.
 
@@ -891,13 +927,6 @@ Internet-Draft                   HPCC++                     January 2021
    routes and makes a timely and accurate decision on path selection and
    traffic admission.
 
-
-
-Miao, et al.              Expires July 20, 2022                [Page 16]
-
-Internet-Draft                   HPCC++                     January 2021
-
-
 10.  Acknowledgments
 
    The authors would like to thank ICCRG members for their valuable
@@ -913,6 +942,17 @@ Internet-Draft                   HPCC++                     January 2021
 12.  References
 
 12.1.  Normative References
+
+
+
+
+
+
+
+Miao, et al.            Expires September 8, 2022              [Page 17]
+
+Internet-Draft                   HPCC++                       March 2021
+
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
@@ -945,15 +985,6 @@ Internet-Draft                   HPCC++                     January 2021
               "Inband Flow Analyzer", February 2019,
               <https://tools.ietf.org/html/draft-kumar-ippm-ifa-01>.
 
-
-
-
-
-Miao, et al.              Expires July 20, 2022                [Page 17]
-
-Internet-Draft                   HPCC++                     January 2021
-
-
    [Katabi-SIGCOMM2002]
               Katabi, D., Handley, M., and C. Rohrs, "Congestion Control
               for High Bandwidth-Delay Product Networks", ACM
@@ -968,6 +999,16 @@ Internet-Draft                   HPCC++                     January 2021
               L., Cao, Z., Zhang, M., Kelly, F., Alizadeh, M., and M.
               Yu, "HPCC: High Precision Congestion Control", ACM
               SIGCOMM Beijing, China, August 2019.
+
+
+
+
+
+
+Miao, et al.            Expires September 8, 2022              [Page 18]
+
+Internet-Draft                   HPCC++                       March 2021
+
 
    [Zhu-SIGCOMM2015]
               Zhu, Y., Eran, H., Firestone, D., Guo, C., Lipshteyn, M.,
@@ -996,20 +1037,6 @@ Authors' Addresses
    Email: hongqiang.liu@alibaba-inc.com
 
 
-
-
-
-
-
-
-
-
-
-Miao, et al.              Expires July 20, 2022                [Page 18]
-
-Internet-Draft                   HPCC++                     January 2021
-
-
    Rong Pan
    Intel, Corp.
    2200 Mission College Blvd.
@@ -1026,6 +1053,17 @@ Internet-Draft                   HPCC++                     January 2021
    USA
 
    Email: jk.lee@intel.com
+
+
+
+
+
+
+
+
+Miao, et al.            Expires September 8, 2022              [Page 19]
+
+Internet-Draft                   HPCC++                       March 2021
 
 
    Changhoon Kim
@@ -1055,17 +1093,6 @@ Internet-Draft                   HPCC++                     January 2021
    Email: yuvals@nvidia.com
 
 
-
-
-
-
-
-
-Miao, et al.              Expires July 20, 2022                [Page 19]
-
-Internet-Draft                   HPCC++                     January 2021
-
-
    Jeff Tantsura
    Microsoft Corporation
    One Microsoft Way
@@ -1090,31 +1117,4 @@ Internet-Draft                   HPCC++                     January 2021
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Miao, et al.              Expires July 20, 2022                [Page 20]
+Miao, et al.            Expires September 8, 2022              [Page 20]

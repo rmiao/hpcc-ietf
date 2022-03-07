@@ -572,7 +572,7 @@ is used in the network.
   <section anchor = "sec-implementation-ifa"
 	 title ="Inband telemetry on IFA2.0">
    <t>IFA</t>
-   <t>
+   
     <t><figure anchor="fig-ifa-header"
                title=".">
    <artwork><![CDATA[
@@ -591,7 +591,7 @@ is used in the network.
 
   ]]></artwork>
           </figure></t>
-   </t>
+   
 
    </section>
 
