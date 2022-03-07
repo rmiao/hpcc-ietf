@@ -573,7 +573,24 @@ is used in the network.
 	 title ="Inband telemetry on IFA2.0">
    <t>IFA</t>
    <t>
-   To be added.
+    <t><figure anchor="fig-ifa-header"
+               title=".">
+   <artwork><![CDATA[
+
+    0                   1                   2                   3
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |Version|Global |               |   Flags       |               |  
+   |       |Name   | Next Header   |               |   Max Length  |
+   |       |Space  |               |               |               |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   
+
+                      Example IFA header
+
+
+  ]]></artwork>
+          </figure></t>
    </t>
 
    </section>
@@ -867,9 +884,30 @@ under heavy load.
     <section anchor = "sec-reference-tcp"
       title = "Implementation on TCP">
       <t>
-       We describe reference implementation on IETF TCP.
+      Taking the benefit of precise congestion control for TCP is a natural next step. 
+      Since TCP segmentation at TX side (e.g., TSO) and coalescing at RX side (e.g., GRO) happen at the NIC HW or low-layer of TCP/IP stack, carrying per-pkt &INT; 
+      info between the TCP congestion control engine and network fabric has to work with the TSO and GRO. 
+      Instead, one way to adopt HPCC++ for TCP is using the special probe and notification packets to retrieve &INT; information. 
+      The sender generates a probe packet when it is actively sending data. The probe packet has the same 5-tuples (source and destination addresses, source and destination ports and protocol number)
+      with the data packets and the &INT; header. The switches along the path identify the probe packet by its &INT; header and insert the &INT;. 
+      Once received the probe packet with &INT;, the receiver replies with a response packet piggybacking the &INT; to the sender. 
+      Note, both probe and response packets use a special DSCP number so that it can bypass the TSO and GRO in each side.  
 
-       To be added. 
+
+
+       <!-- One possible adoption of HPCC for TCP is condensing the telemetry information into a few bytes fitting into TCP options header. 
+       HPCC algorithm at the end requires the max(U) to make MIMD decision. 
+       Instead of carrying a full stack of raw telemetry data, we carry only the max(U) in the header to fit into the small TCP options header size 
+       limit and to simplify the processing at the NIC/host. In this mode, the calculation of 'normalized U' is offloaded to switches. 
+       Note that this computation is not per-flow, but per-link or -queue operation at the switches with low scale memory requirement. 
+       Each hop switch simply compares the local U value with the value carried in the TCP options header and updates the header value if the local U is larger. 
+       The U field is initialized to zero at the sender, conditionally updated by hop switches, and delivers the max(U) to the receiver, which can directly use 
+       in a receiver-driven mode or echo back to the sender in a sender-driven mode.     
+      
+      In general, the granularity of telemetry tagging in the TCP options header 
+      needs to be adjusted to control its impact on TSO or GRO performance. -->
+
+
     </t>
     </section>
   </section>
