@@ -52,6 +52,19 @@
     </author>
 
 
+    <author fullname="Surendra Anubolu" initials="S" surname="Anubolu">
+      <organization abbrev="Broadcom Inc">Broadcom, Inc.</organization>
+      <address>
+        <postal>
+          <street>1320 Ridder Park</street>
+          <city>San Jose</city>
+          <region>CA</region>
+          <code>95131</code>
+          <country>USA</country>
+        </postal>
+        <email>surendra.anubolu@broadcom.com</email>
+      </address>
+    </author>
 
     <author fullname="Rong Pan" initials="R" surname="Pan">
       <organization abbrev="Intel Corporation">Intel, Corp.</organization>
@@ -142,7 +155,7 @@
       </address>
     </author>
     
-    <date year="2021" />
+    <date year="2022" />
 
     <area>TSV</area>
 
@@ -573,18 +586,28 @@ is used in the network.
 	 title ="Inband telemetry on IFA2.0">
    <t>For more details, please refer to IFA <xref target="I-D.ietf-kumar-ippm-ifa"></xref></t>
    
-    <!-- <t><figure anchor="fig-ifa-header"
+    <t><figure anchor="fig-ifa-header"
                title="Example IFA header">
-   <artwork><![CDATA[
+      <artwork><![CDATA[
 
     0                   1                   2                   3
     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |          deviceID                                         | SP|
+   |  lns  |  deviceID                             |     rsvd      |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    | Speed |                    Timestamp                  |txBytes|
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |      txBytes(lower)           |         Queue Length          |
+   |       egressPort              |         ingressPort           |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                         rxTimeStamp                           |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                         residenceTime                         |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                            txBytes                            |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |       rsvd                    |      Queue Length             |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                             rsvd                              |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    |                            2nd Hop                            |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -594,8 +617,7 @@ is used in the network.
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
   ]]></artwork>
-          </figure></t>
-   -->
+	    </figure></t>
    </section>
 
 
