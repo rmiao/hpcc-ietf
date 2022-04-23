@@ -5,7 +5,9 @@
 Network Working Group                                            R. Miao
 Internet-Draft                                                    H. Liu
 Intended status: Experimental                              Alibaba Group
-Expires: September 8, 2022                                        R. Pan
+Expires: 25 October 2022                                      S. Anubolu
+                                                            Broadcom Inc
+                                                                  R. Pan
                                                                   J. Lee
                                                                   C. Kim
                                                        Intel Corporation
@@ -14,7 +16,7 @@ Expires: September 8, 2022                                        R. Pan
                                              Mellanox Technologies, Inc.
                                                              J. Tantsura
                                                    Microsoft Corporation
-                                                           March 7, 2021
+                                                           23 April 2022
 
 
            HPCC++: Enhanced High Precision Congestion Control
@@ -481,6 +483,34 @@ Internet-Draft                   HPCC++                       March 2021
 6.1.1.  Inband telemetry on IFA2.0
 
    For more details, please refer to IFA [I-D.ietf-kumar-ippm-ifa]
+          0                   1                   2                   3
+       0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |  lns  |  deviceID                             |     rsvd      |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      | Speed |                    Timestamp                  |txBytes|
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |       egressPort              |         ingressPort           |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |                         rxTimeStamp                           |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |                         residenceTime                         |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |                            txBytes                            |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |       rsvd                    |      Queue Length             |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |                             rsvd                              |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |                            2nd Hop                            |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |                            2nd Hop(lower)                     |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |                    Options                    |    Padding    |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+
+                        Figure 4: Example IFA header
 
 6.1.2.  Inband telemetry on IOAM
 
@@ -523,9 +553,9 @@ Internet-Draft                   HPCC++                       March 2021
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 
-                    Figure 4: Example P4.org INT header
+                    Figure 5: Example P4.org INT header
 
-   Figure 4 shows the packet format of the INT padding after UDP header.
+   Figure 5 shows the packet format of the INT padding after UDP header.
    The field nHop is the hop count of the packet's path.  The field
    pathID is the XOR of all the switch IDs (which are 12 bits) along the
    path.  The sender sets nHop and pathID to 0.  Each switch along the
@@ -634,7 +664,7 @@ Internet-Draft                   HPCC++                       March 2021
 
 6.3.1.  Sender-based HPCC
 
-   Figure 5 shows HPCC++ implementation on a NIC.  The NIC provides an
+   Figure 6 shows HPCC++ implementation on a NIC.  The NIC provides an
    HPCC++ module that resides on the data path of the NIC, HPCC++
    modules realize both sender and receiver roles.
 
@@ -652,7 +682,7 @@ Internet-Draft                   HPCC++                       March 2021
   +------------------------------------------------------------------+
 
 
-                 Figure 5: Overview of NIC Implementation
+                 Figure 6: Overview of NIC Implementation
 
    1.  Sender side flow
 
