@@ -595,11 +595,11 @@ is used in the network.
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    |  lns  |  deviceID                             |     rsvd      |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   | Speed |                    Timestamp                  |txBytes|
+   | Speed |cn |     qid   |          rxTimestampSec               |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    |       egressPort              |         ingressPort           |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |                         rxTimeStamp                           |
+   |                        rxTimeStampNs                          |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    |                         residenceTime                         |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -618,6 +618,14 @@ is used in the network.
 
   ]]></artwork>
 	    </figure></t>
+  <t><xref target="fig-ifa-header"></xref> shows the packet format of the
+	  INT metadata after UDP and IFA metadata header. 
+	  The field lns is the local name space and defines the format of the metadata. The field deviceID is a 20-bit field that uniquely identifies the device in the network. 
+	  The Speed field is an encode field with the following encoding for port speed:
+	  0 - 10G, 1 - 25G, 2 - 40G, 3- 50G, 4 - 100G, 5 - 200G, 6 - 400G.
+	  The field cn is the congestion field and denotes if the packet experienced congestion.
+
+  </t>
    </section>
 
 
