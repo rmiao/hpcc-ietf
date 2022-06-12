@@ -52,6 +52,19 @@
     </author>
 
 
+    <author fullname="Surendra Anubolu" initials="S" surname="Anubolu">
+      <organization abbrev="Broadcom Inc">Broadcom, Inc.</organization>
+      <address>
+        <postal>
+          <street>1320 Ridder Park</street>
+          <city>San Jose</city>
+          <region>CA</region>
+          <code>95131</code>
+          <country>USA</country>
+        </postal>
+        <email>surendra.anubolu@broadcom.com</email>
+      </address>
+    </author>
 
     <author fullname="Rong Pan" initials="R" surname="Pan">
       <organization abbrev="Intel Corporation">Intel, Corp.</organization>
@@ -142,7 +155,7 @@
       </address>
     </author>
     
-    <date year="2021" />
+    <date year="2022" />
 
     <area>TSV</area>
 
@@ -573,18 +586,28 @@ is used in the network.
 	 title ="Inband telemetry on IFA2.0">
    <t>For more details, please refer to IFA <xref target="I-D.ietf-kumar-ippm-ifa"></xref></t>
    
-    <!-- <t><figure anchor="fig-ifa-header"
+    <t><figure anchor="fig-ifa-header"
                title="Example IFA header">
-   <artwork><![CDATA[
+      <artwork><![CDATA[
 
     0                   1                   2                   3
     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |          deviceID                                         | SP|
+   |  lns  |  deviceID                             |     rsvd      |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   | Speed |                    Timestamp                  |txBytes|
+   | Speed |cn |     qid   |          rxTimestampSec               |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |      txBytes(lower)           |         Queue Length          |
+   |       egressPort              |         ingressPort           |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                        rxTimeStampNs                          |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                         residenceTime                         |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                            txBytes                            |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |       rsvd                    |      Queue Length             |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                             rsvd                              |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    |                            2nd Hop                            |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -594,8 +617,15 @@ is used in the network.
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
   ]]></artwork>
-          </figure></t>
-   -->
+	    </figure></t>
+  <t><xref target="fig-ifa-header"></xref> shows the packet format of the
+	  INT metadata after UDP and IFA metadata header. 
+	  The field lns is the local name space and defines the format of the metadata. The field deviceID is a 20-bit field that uniquely identifies the device in the network. 
+	  The Speed field is an encode field with the following encoding for port speed:
+	  0 - 10G, 1 - 25G, 2 - 40G, 3- 50G, 4 - 100G, 5 - 200G, 6 - 400G.
+	  The field cn is the congestion field and denotes if the packet experienced congestion.
+
+  </t>
    </section>
 
 
