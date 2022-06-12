@@ -1,0 +1,448 @@
+
+
+
+
+Network Working Group                                            R. Miao
+Internet-Draft                                                    H. Liu
+Intended status: Informational                             Alibaba Group
+Expires: 14 December 2022                                     S. Anubolu
+                                                            Broadcom Inc
+                                                                  R. Pan
+                                                                  J. Lee
+                                                       Intel Corporation
+                                                                B. Gafni
+                                                           Y. Shpigelman
+                                             Mellanox Technologies, Inc.
+                                                             J. Tantsura
+                                                   Microsoft Corporation
+                                                            12 June 2022
+
+
+           HPCC++: Enhanced High Precision Congestion Control
+                        draft-miao-tsv-hpcc-info
+
+Abstract
+
+   Congestion control (CC) is the key to achieving ultra-low latency,
+   high bandwidth and network stability in high-speed networks.
+   However, the existing high-speed CC schemes have inherent limitations
+   for reaching these goals.
+
+   In this document, we describe HPCC++ (High Precision Congestion
+   Control), a new high-speed CC mechanism which achieves the three
+   goals simultaneously.  HPCC++ leverages inband telemetry to obtain
+   precise link load information and controls traffic precisely.  By
+   addressing challenges such as delayed signaling during congestion and
+   overreaction to the congestion signaling using inband and granular
+   telemetry, HPCC++ can quickly converge to utilize all the available
+   bandwidth while avoiding congestion, and can maintain near-zero in-
+   network queues for ultra-low latency.  HPCC++ is also fair and easy
+   to deploy in hardware, implementable with commodity NICs and
+   switches.
+
+Status of This Memo
+
+   This Internet-Draft is submitted in full conformance with the
+   provisions of BCP 78 and BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF).  Note that other groups may also distribute
+   working documents as Internet-Drafts.  The list of current Internet-
+   Drafts is at https://datatracker.ietf.org/drafts/current/.
+
+
+
+
+Miao, et al.            Expires 14 December 2022                [Page 1]
+
+Internet-Draft                   HPCC++                        June 2022
+
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   This Internet-Draft will expire on 14 December 2022.
+
+Copyright Notice
+
+   Copyright (c) 2022 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents (https://trustee.ietf.org/
+   license-info) in effect on the date of publication of this document.
+   Please review these documents carefully, as they describe your rights
+   and restrictions with respect to this document.  Code Components
+   extracted from this document must include Revised BSD License text as
+   described in Section 4.e of the Trust Legal Provisions and are
+   provided without warranty as described in the Revised BSD License.
+
+Table of Contents
+
+   1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   2
+   2.  Inband telemetry padding at the network switches  . . . . . .   3
+     2.1.  Inband telemetry on IFA2.0  . . . . . . . . . . . . . . .   4
+     2.2.  Inband telemetry on IOAM  . . . . . . . . . . . . . . . .   5
+     2.3.  Inband telemetry on P4  . . . . . . . . . . . . . . . . .   5
+   3.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   6
+   4.  Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .   6
+   5.  Contributors  . . . . . . . . . . . . . . . . . . . . . . . .   6
+   6.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   6
+     6.1.  Normative References  . . . . . . . . . . . . . . . . . .   6
+     6.2.  Informative References  . . . . . . . . . . . . . . . . .   6
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .   7
+
+1.  Introduction
+
+   The link speed in data center networks has grown from 1Gbps to
+   100Gbps in the past decade, and this growth is continuing.  Ultralow
+   latency and high bandwidth, which are demanded by more and more
+   applications, are two critical requirements in today's and future
+   high-speed networks.
+
+   Given that traditional software-based network stacks in hosts can no
+   longer sustain the critical latency and bandwidth requirements as
+   described in [Zhu-SIGCOMM2015], offloading network stacks into
+   hardware is an inevitable direction in high-speed networks.  As an
+
+
+
+Miao, et al.            Expires 14 December 2022                [Page 2]
+
+Internet-Draft                   HPCC++                        June 2022
+
+
+   example, large-scale networks with RDMA (remote direct memory access)
+   often uses hardware-offloading solutions.  In some cases, the RDMA
+   networks still face fundamental challenges to reconcile low latency,
+   high bandwidth utilization, and high stability.
+
+   This document describes a new congestion control mechanism, HPCC++
+   (Enhanced High Precision Congestion Control), for large-scale, high-
+   speed networks.  The key idea behind HPCC++ is to leverage the
+   precise link load information from signaled through inband telemetry
+   to compute accurate flow rate updates.  Unlike existing approaches
+   that often require a large number of iterations to find the proper
+   flow rates, HPCC++ requires only one rate update step in most cases.
+   Using precise information from inband telemetry enables HPCC++ to
+   address the limitations in current congestion control schemes.
+   First, HPCC++ senders can quickly ramp up flow rates for high
+   utilization and ramp down flow rates for congestion avoidance.
+   Second, HPCC++ senders can quickly adjust the flow rates to keep each
+   link's output rate slightly lower than the link's capacity,
+   preventing queues from being built-up as well as preserving high link
+   utilization.  Finally, since sending rates are computed precisely
+   based on direct measurements at switches, HPCC++ requires merely
+   three independent parameters that are used to tune fairness and
+   efficiency.
+
+   HPCC++ is an enhanced version of [SIGCOMM-HPCC].  HPCC++ takes into
+   account system constraints and aims to reduce the design overhead and
+   further improves the performance.
+
+   This document describes the architecture changes in switches and end-
+   hosts to support the needed tranmission of inband telemetry and its
+   consumption, that imporves the efficiency in handling network
+   congestion.
+
+2.  Inband telemetry padding at the network switches
+
+   HPCC++ only relies on packets to share information across senders,
+   receivers, and switches.  The switch should capture inband telemetry
+   information that includes link load (txBytes, qlen, ts) and link spec
+   (switch_ID, port_ID, B) at the egress port.  Note, each switch should
+   record all those information at the single snapshot to achieve a
+   precise link load estimate.  Inside a data center, the path length is
+   often no more than 5 hops.  The overhead of the inband telemetry
+   padding for HPCC++ is considered to be low.
+
+   As long the above algorithm is met, HPCC++ is open to a variety of
+   inband telemetry format standards, which are orthogonal to the HPCC++
+   algorithm.  Although this document does not mandate a particular
+   inband telemetry header format or encapsulation, we provide concrete
+
+
+
+Miao, et al.            Expires 14 December 2022                [Page 3]
+
+Internet-Draft                   HPCC++                        June 2022
+
+
+   implementation specifications using strandard inband telemetry
+   protocols, including IFA [I-D.ietf-kumar-ippm-ifa], IETF IOAM
+   [I-D.ietf-ippm-ioam-data], and P4.org INT [P4-INT].  In fact, the
+   emerging inband telemetry protocols inform the evolution for a
+   broader range of protocols and network functions, where this document
+   leverages the trend to propose the architecture change to support in-
+   network functions like congestion control with high efficiency.
+
+2.1.  Inband telemetry on IFA2.0
+
+   For more details, please refer to IFA [I-D.ietf-kumar-ippm-ifa]
+
+       0                   1                   2                   3
+       0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |  lns  |  deviceID                             |     rsvd      |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      | Speed |cn |     qid   |          rxTimestampSec               |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |       egressPort              |         ingressPort           |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |                        rxTimeStampNs                          |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |                         residenceTime                         |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |                            txBytes                            |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |       rsvd                    |      Queue Length             |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |                             rsvd                              |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |                            2nd Hop                            |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |                            2nd Hop(lower)                     |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |                    Options                    |    Padding    |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+
+                        Figure 1: Example IFA header
+
+
+
+
+
+
+
+
+
+
+
+Miao, et al.            Expires 14 December 2022                [Page 4]
+
+Internet-Draft                   HPCC++                        June 2022
+
+
+   Figure 1 shows the packet format of the INT metadata after UDP and
+   IFA metadata header.  The field lns is the local name space and
+   defines the format of the metadata.  The field deviceID is a 20-bit
+   field that uniquely identifies the device in the network.  The Speed
+   field is an encode field with the following encoding for port speed:
+   0 - 10G, 1 - 25G, 2 - 40G, 3- 50G, 4 - 100G, 5 - 200G, 6 - 400G.  The
+   field cn is the congestion field and denotes if the packet
+   experienced congestion.
+
+2.2.  Inband telemetry on IOAM
+
+   Please refer to IETF IOAM [I-D.ietf-ippm-ioam-data]
+
+2.3.  Inband telemetry on P4
+
+       0                   1                   2                   3
+       0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |  nHop |        pathID         |          Padding              |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      | Speed |                    Timestamp                  |txBytes|
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |      txBytes(lower)           |         Queue Length          |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |                            2nd Hop                            |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |                            2nd Hop(lower)                     |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |                    Options                    |    Padding    |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+
+                    Figure 2: Example P4.org INT header
+
+   Figure 2 shows the packet format of the INT padding after UDP header.
+   The field nHop is the hop count of the packet's path.  The field
+   pathID is the XOR of all the switch IDs (which are 12 bits) along the
+   path.  The sender sets nHop and pathID to 0.  Each switch along the
+   path adds nHop by 1, and XORs its own switch ID to the pathID.  The
+   sender uses pathID to judge whether the path of the flow has been
+   changed.  If so, it throws away the existing status records of the
+   flow and builds up new records.  Each switch has an 8-byte field to
+   record the status of the egress port of the packet when the packet is
+   emitted.  B is a enum type which indicates the speed type of the
+   port(e.g. 40Gbps, 100Gbps, etc.).  Timestamp (24 bits) is when the
+   packet is emitted from its egress port, txBytes (20 bits) is the
+   accumulative total bytes sent from the egress port, and Queue length
+   (16 bits) is the current queue length of the egress port.
+
+
+
+Miao, et al.            Expires 14 December 2022                [Page 5]
+
+Internet-Draft                   HPCC++                        June 2022
+
+
+3.  IANA Considerations
+
+   This document makes no request of IANA.
+
+4.  Acknowledgments
+
+   The authors would like to thank RTGWG members for their valuable
+   review comments and helpful input to this specification.
+
+5.  Contributors
+
+   The following individuals have contributed to the implementation and
+   evaluation of the proposed scheme, and therefore have helped to
+   validate and substantially improve this specification: Pedro Y.
+   Segura, Roberto P.  Cebrian, Robert Southworth and Malek Musleh.
+
+6.  References
+
+6.1.  Normative References
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119,
+              DOI 10.17487/RFC2119, March 1997,
+              <https://www.rfc-editor.org/info/rfc2119>.
+
+   [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
+              2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
+              May 2017, <https://www.rfc-editor.org/info/rfc8174>.
+
+6.2.  Informative References
+
+   [I-D.ietf-avtcore-cc-feedback-message]
+              Sarker, Z., Perkins, C., Singh, V., and M. A. Ramalho,
+              "RTP Control Protocol (RTCP) Feedback for Congestion
+              Control", Work in Progress, Internet-Draft, draft-ietf-
+              avtcore-cc-feedback-message-09, 2 November 2020,
+              <https://www.ietf.org/archive/id/draft-ietf-avtcore-cc-
+              feedback-message-09.txt>.
+
+   [Zhu-SIGCOMM2015]
+              Zhu, Y., Eran, H., Firestone, D., Guo, C., Lipshteyn, M.,
+              Liron, Y., Padhye, J., Raindel, S., Yahia, M. H., and M.
+              Zhang, "Congestion Control for Large-Scale RDMA
+              Deployments", ACM SIGCOMM London, United Kingdom, August
+              2015.
+
+
+
+
+
+
+Miao, et al.            Expires 14 December 2022                [Page 6]
+
+Internet-Draft                   HPCC++                        June 2022
+
+
+   [P4-INT]   "In-band Network Telemetry (INT) Dataplane Specification,
+              v2.0", February 2020, <https://github.com/p4lang/p4-
+              applications/blob/master/docs/INT_v2_0.pdf>.
+
+   [I-D.ietf-ippm-ioam-data]
+              "Data Fields for In-situ OAM", March 2020,
+              <https://tools.ietf.org/html/draft-ietf-ippm-ioam-data-
+              09>.
+
+   [I-D.ietf-kumar-ippm-ifa]
+              "Inband Flow Analyzer", February 2019,
+              <https://tools.ietf.org/html/draft-kumar-ippm-ifa-01>.
+
+   [draft-miao-tsv-hpcc]
+              Miao, R., "HPCC++: Enhanced High Precision Congestion
+              Control", June 2022.
+
+   [draft-miao-tsv-hpcc-info]
+              Miao, R., "HPCC++: Enhanced High Precision Congestion
+              Control (Informational)", June 2022.
+
+   [SIGCOMM-HPCC]
+              Li, Y., Miao, R., Liu, H., Zhuang, Y., Fei Feng, F., Tang,
+              L., Cao, Z., Zhang, M., Kelly, F., Alizadeh, M., and M.
+              Yu, "HPCC: High Precision Congestion Control", ACM
+              SIGCOMM Beijing, China, August 2019.
+
+Authors' Addresses
+
+   Rui Miao
+   Alibaba Group
+   525 Almanor Ave, 4th Floor
+   Sunnyvale, CA 94085
+   United States of America
+   Email: miao.rui@alibaba-inc.com
+
+
+   Hongqiang H. Liu
+   Alibaba Group
+   108th Ave NE, Suite 800
+   Bellevue, WA 98004
+   United States of America
+   Email: hongqiang.liu@alibaba-inc.com
+
+
+
+
+
+
+
+
+Miao, et al.            Expires 14 December 2022                [Page 7]
+
+Internet-Draft                   HPCC++                        June 2022
+
+
+   Surendra Anubolu
+   Broadcom, Inc.
+   1320 Ridder Park
+   San Jose, CA 95131
+   United States of America
+   Email: surendra.anubolu@broadcom.com
+
+
+   Rong Pan
+   Intel, Corp.
+   2200 Mission College Blvd.
+   Santa Clara, CA 95054
+   United States of America
+   Email: rong.pan@intel.com
+
+
+   Jeongkeun Lee
+   Intel, Corp.
+   4750 Patrick Henry Dr.
+   Santa Clara, CA 95054
+   United States of America
+   Email: jk.lee@intel.com
+
+
+   Barak Gafni
+   Mellanox Technologies, Inc.
+   350 Oakmead Parkway, Suite 100
+   Sunnyvale, CA 94085
+   United States of America
+   Email: gbarak@mellanox.com
+
+
+   Yuval Shpigelman
+   Mellanox Technologies, Inc.
+   Haim Hazaz 3A
+   Netanya 4247417
+   Israel
+   Email: yuvals@nvidia.com
+
+
+   Jeff Tantsura
+   Microsoft Corporation
+   One Microsoft Way
+   Redmond, Washington 98052-6399
+   United States of America
+   Email: jefftantsura@microsoft.com
+
+
+
+
+
+Miao, et al.            Expires 14 December 2022                [Page 8]

@@ -9,8 +9,8 @@
 <?rfc toc="yes" ?>
 <?rfc compact="yes" ?>
 <?rfc symrefs="yes" ?>
-<rfc category="exp" 
-     docName="draft-miao-rtgwg-hpccplus-00"
+<rfc category="std" 
+     docName="draft-miao-tsv-hpcc-00"
      ipr="trust200902">
   <!-- What is the category field value-->
 
@@ -93,22 +93,6 @@
           <country>USA</country>
         </postal>
         <email>jk.lee@intel.com</email>
-      </address>
-    </author>
-
-    <author fullname="Changhoon Kim" initials="C. " surname="Kim">
-      <organization>Intel Corporation</organization>
-
-      <address>
-        <postal>
-          <street>4750 Patrick Henry Dr.</street>
-          <city>Santa Clara</city>
-          <region>CA</region>
-          <code>95054</code>
-          <country>USA</country>
-        </postal>
-
-        <email>chang.kim@intel.com</email>
       </address>
     </author>
 
@@ -214,10 +198,8 @@ easy to deploy in hardware, implementable with commodity NICs and switches.</t>
       measurements at switches, HPCC++ requires merely three independent
       parameters that are used to tune fairness and efficiency. </t>
 
-      <t>The base form of HPCC++ is the original HPCC algorithm and its full description can be found 
-      in <xref target="SIGCOMM-HPCC"></xref>. While the original design lays the foundation 
-      for &INT; based precision congestion control, 
-      HPCC++ is an enhanced version which takes into account system constraints and aims to reduce the design 
+      <t>HPCC++ is an enhanced version of <xref target="SIGCOMM-HPCC"></xref>. 
+      HPCC++ takes into account system constraints and aims to reduce the design 
       overhead and further improves the performance. <xref target = "sec-implementation"></xref> describes these
       detailed proposed design enhancements and guidelines. </t>
       
@@ -522,7 +504,11 @@ To ensure network stability, HPCC++ establishes a few guidelines for choosing im
 <t>There are three compoments HPCC++ needs to implement: telementry padding, congestion notification, and rate update.</t>
 
 
+<section anchor = "sec-implementation-telemery"
+	 title ="Inband telemetry padding at the network switches">
+   <t>The specifications of switch padding for inband telemetry can be found in <xref target="draft-miao-tsv-hpcc-info"></xref>.</t>
 
+</section>
 
 
 
@@ -559,130 +545,6 @@ is used in the network.
 </section>
 
 -->
-
-<section anchor = "sec-implementation-telemery"
-	 title ="Inband telemetry padding at the network switches">
-   <t>HPCC++ only relies on packets to share information across senders,
-   receivers, and switches. 
-   The switch should capture &INT; information that includes link load (txBytes, qlen, ts) and 
-    link spec (switch_ID, port_ID, B) at the egress port.
-    Note, each switch should record all those information at the single snapshot to achieve a precise link load
-    estimate. Inside a data center, the path length is often no more than 5 hops. 
-   The overhead of the inband telemetry padding for HPCC++ is considered to be low.</t>
-
-
-  <t> As long the above algorithm is met, HPCC++ is open to a variety of inband telemetry format standards, 
-  which are orthogonal to the HPCC++ algorithm. 
-  Although this document does not mandate a particular &INT; header format or encapsulation, 
-  we provide concrete implementation specifications using strandard inband telemetry protocols, 
-  including IFA <xref target="I-D.ietf-kumar-ippm-ifa"></xref>, IETF IOAM <xref target="I-D.ietf-ippm-ioam-data"></xref>,
-  and P4.org INT <xref target="P4-INT"></xref>. 
-  In fact, the emerging inband telemetry protocols inform the evolution for a broader range of protocols and network functions, 
-  where this document leverages the trend to propose the architecture change to support in-network functions like congestion control with high efficiency.
-  </t>
-
-
-  <section anchor = "sec-implementation-ifa"
-	 title ="Inband telemetry on IFA2.0">
-   <t>For more details, please refer to IFA <xref target="I-D.ietf-kumar-ippm-ifa"></xref></t>
-   
-    <t><figure anchor="fig-ifa-header"
-               title="Example IFA header">
-      <artwork><![CDATA[
-
-    0                   1                   2                   3
-    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |  lns  |  deviceID                             |     rsvd      |
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   | Speed |cn |     qid   |          rxTimestampSec               |
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |       egressPort              |         ingressPort           |
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |                        rxTimeStampNs                          |
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |                         residenceTime                         |
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |                            txBytes                            |
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |       rsvd                    |      Queue Length             |
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |                             rsvd                              |
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |                            2nd Hop                            |
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |                            2nd Hop(lower)                     |
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |                    Options                    |    Padding    |
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-  ]]></artwork>
-	    </figure></t>
-  <t><xref target="fig-ifa-header"></xref> shows the packet format of the
-	  INT metadata after UDP and IFA metadata header. 
-	  The field lns is the local name space and defines the format of the metadata. The field deviceID is a 20-bit field that uniquely identifies the device in the network. 
-	  The Speed field is an encode field with the following encoding for port speed:
-	  0 - 10G, 1 - 25G, 2 - 40G, 3- 50G, 4 - 100G, 5 - 200G, 6 - 400G.
-	  The field cn is the congestion field and denotes if the packet experienced congestion.
-
-  </t>
-   </section>
-
-
-  <section anchor = "sec-implementation-ioam"
-	 title ="Inband telemetry on IOAM">
-   <t>Please refer to IETF IOAM <xref target="I-D.ietf-ippm-ioam-data"></xref></t>
-   </section>
-
-  <section anchor = "sec-implementation-p4"
-	 title ="Inband telemetry on P4">
-
-     <t><figure anchor="fig-p4int"
-               title="Example P4.org INT header">
-   <artwork><![CDATA[
-
-    0                   1                   2                   3
-    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |  nHop |        pathID         |          Padding              |
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   | Speed |                    Timestamp                  |txBytes|
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |      txBytes(lower)           |         Queue Length          |
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |                            2nd Hop                            |
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |                            2nd Hop(lower)                     |
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |                    Options                    |    Padding    |
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-  ]]></artwork>
-          </figure></t>
-
-  <t><xref target="fig-p4int"></xref> shows the packet format of the
-INT padding after UDP header. 
-The field nHop is the hop count of the packet's path. The field pathID is the XOR of all the switch
-IDs (which are 12 bits) along the path. The sender sets nHop and
-pathID to 0. Each switch along the path adds nHop by 1, and XORs
-its own switch ID to the pathID. The sender uses pathID to judge
-whether the path of the flow has been changed. If so, it throws away
-the existing status records of the flow and builds up new records.
-
-Each switch has an 8-byte field to record the status of the egress
-port of the packet when the packet is emitted. B is a enum type
-which indicates the speed type of the port(e.g. 40Gbps, 100Gbps, etc.). 
-Timestamp (24 bits) is when the packet is emitted from its egress port,
-txBytes (20 bits) is the accumulative total bytes sent from the egress port,
-and Queue length (16 bits) is the current queue length of the egress port.
-</t>
-
-
-   </section>
-
-   
-
-</section>
 
   <section anchor = "sec-notification"
     title = "Congestion Notification">
@@ -1011,7 +873,7 @@ under heavy load.
   </section>
 
   <section anchor = "sec-QoS"
-	 title = "Work with QoS queuing">
+	 title = "Work with multiple queues">
     
     <t>Under the use of QoS (Quality of service) priority queuing in switches,
     the length of flow's own queue cannot tell the actual queuing time and the exact extent of congestion.
@@ -1091,6 +953,33 @@ comments and helpful input to this specification. </t>
 
         <seriesInfo name="ACM SIGCOMM"
 		    value = "Pittsburgh, Pennsylvania, USA"/>
+
+      </reference>
+
+      <reference anchor="draft-miao-tsv-hpcc"
+		 target="">
+        <front>
+          <title>HPCC++: Enhanced High Precision Congestion Control
+          </title>
+
+                    <author fullname="Rui Miao" initials="R." surname="Miao">
+            <organization></organization>
+          </author>
+          <date month="June" year="2022" />
+        </front>
+
+      </reference>
+
+            <reference anchor="draft-miao-tsv-hpcc-info"
+		 target="">
+        <front>
+          <title>HPCC++: Enhanced High Precision Congestion Control (Informational)
+          </title>
+           <author fullname="Rui Miao" initials="R." surname="Miao">
+            <organization></organization>
+          </author>
+          <date month="June" year="2022" />
+        </front>
 
       </reference>
 
