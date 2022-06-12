@@ -1,0 +1,1276 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd" [
+<!ENTITY rfc2119 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml">
+<!ENTITY rfc8174 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8174.xml">
+<!ENTITY INT "inband telemetry">
+<!ENTITY I-D.ietf-avtcore-cc-feedback-message SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-avtcore-cc-feedback-message.xml">
+]>
+<?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
+<?rfc toc="yes" ?>
+<?rfc compact="yes" ?>
+<?rfc symrefs="yes" ?>
+<rfc category="exp" 
+     docName="draft-miao-rtgwg-hpccplus-00"
+     ipr="trust200902">
+  <!-- What is the category field value-->
+
+  <front>
+    <title abbrev="HPCC++">
+    HPCC++: Enhanced High Precision Congestion Control
+    </title>
+    
+    
+    <author fullname="Rui Miao" initials="R." surname="Miao">
+      <organization>Alibaba Group</organization>
+
+      <address>
+        <postal>
+          <street>525 Almanor Ave, 4th Floor</street>
+          <city>Sunnyvale</city>
+          <region>CA</region>
+          <code>94085</code>
+          <country>USA</country>
+        </postal>
+	      <email>miao.rui@alibaba-inc.com</email>
+      </address>
+    </author>
+
+
+    <author fullname="Hongqiang H. Liu" initials="H" surname="Liu">
+      <organization>Alibaba Group</organization>
+
+      <address>
+        <postal>
+          <street>108th Ave NE, Suite 800</street>
+          <city>Bellevue</city>
+          <region>WA</region>
+          <code>98004</code>
+          <country>USA</country>
+        </postal>
+        <email>hongqiang.liu@alibaba-inc.com</email>
+      </address>
+    </author>
+
+
+    <author fullname="Surendra Anubolu" initials="S" surname="Anubolu">
+      <organization abbrev="Broadcom Inc">Broadcom, Inc.</organization>
+      <address>
+        <postal>
+          <street>1320 Ridder Park</street>
+          <city>San Jose</city>
+          <region>CA</region>
+          <code>95131</code>
+          <country>USA</country>
+        </postal>
+        <email>surendra.anubolu@broadcom.com</email>
+      </address>
+    </author>
+
+    <author fullname="Rong Pan" initials="R" surname="Pan">
+      <organization abbrev="Intel Corporation">Intel, Corp.</organization>
+      <address>
+        <postal>	
+          <street>2200 Mission College Blvd.</street>
+          <city>Santa Clara</city>
+          <region>CA</region>
+          <code>95054</code>
+          <country>USA</country>
+        </postal>
+	<email>rong.pan@intel.com</email>
+      </address>
+    </author>
+
+
+    <author fullname="Jeongkeun Lee" initials="J" surname="Lee">
+      <organization abbrev="Intel Corporation">Intel, Corp.</organization>
+
+      <address>
+        <postal>
+          <street>4750 Patrick Henry Dr.</street>
+          <city>Santa Clara</city>
+          <region>CA</region>
+          <code>95054</code>
+          <country>USA</country>
+        </postal>
+        <email>jk.lee@intel.com</email>
+      </address>
+    </author>
+
+    <author fullname="Changhoon Kim" initials="C. " surname="Kim">
+      <organization>Intel Corporation</organization>
+
+      <address>
+        <postal>
+          <street>4750 Patrick Henry Dr.</street>
+          <city>Santa Clara</city>
+          <region>CA</region>
+          <code>95054</code>
+          <country>USA</country>
+        </postal>
+
+        <email>chang.kim@intel.com</email>
+      </address>
+    </author>
+
+    <author fullname="Barak Gafni" initials="B. " surname="Gafni">
+      <organization>Mellanox Technologies, Inc.</organization>
+      <address>
+        <postal>
+          <street>350 Oakmead Parkway, Suite 100</street>
+          <city>Sunnyvale</city>
+          <region>CA</region>
+          <code>94085</code>
+          <country>USA</country>
+        </postal>
+
+        <email>gbarak@mellanox.com</email>
+      </address>
+    </author>
+
+    <author fullname="Yuval Shpigelman" initials="Y. " surname="Shpigelman">
+      <organization>Mellanox Technologies, Inc.</organization>
+      <address>
+        <postal>
+          <street>Haim Hazaz 3A</street>
+          <city>Netanya</city>
+          <region></region>
+          <code>4247417</code>
+          <country>Israel</country>
+        </postal>
+
+        <email>yuvals@nvidia.com</email>
+      </address>
+    </author>
+    <author fullname="Jeff Tantsura" initials="J. " surname="Tantsura">
+      <organization>Microsoft Corporation</organization>
+      <address>
+        <postal>
+          <street>One Microsoft Way</street>
+          <city>Redmond</city>
+          <region>Washington</region>
+          <code>98052-6399</code>
+          <country>USA</country>
+        </postal>
+        <email>jefftantsura@microsoft.com</email>
+      </address>
+    </author>
+    
+    <date year="2022" />
+
+    <area>TSV</area>
+
+    <keyword>Data Center Networking</keyword>
+
+    <keyword>Congestion Control</keyword>
+
+    <abstract>
+    <t>Congestion control (CC) is the key to achieving ultra-low latency,
+high bandwidth and network stability in high-speed networks. 
+However, the existing high-speed CC schemes have inherent limitations for reaching these goals.</t>
+
+    <t>In this document, we describe
+HPCC++ (High Precision Congestion Control), a new high-speed CC
+mechanism which achieves the three goals simultaneously. HPCC++
+leverages inband telemetry to obtain precise link load
+information and controls traffic precisely. By addressing challenges
+such as delayed signaling during congestion and overreaction to the congestion signaling using inband and granular telemetry, HPCC++ can quickly 
+converge to utilize all the available bandwidth while avoiding congestion, and can maintain near-zero
+in-network queues for ultra-low latency. HPCC++ is also fair and
+easy to deploy in hardware, implementable with commodity NICs and switches.</t>
+   </abstract>
+   
+   </front>
+
+    <middle>
+    <section anchor="sec-intro" title="Introduction">
+
+    <t>The link speed in data center networks has grown from 1Gbps to
+      100Gbps in the past decade, and this growth is continuing. Ultralow 
+      latency and high bandwidth, which are demanded by more
+      and more applications, are two critical requirements in today's and
+      future high-speed networks. </t>
+
+    <t>Given that traditional software-based network stacks in hosts
+      can no longer sustain the critical latency and bandwidth requirements as described in <xref target="Zhu-SIGCOMM2015"> </xref>, 
+      offloading network stacks into hardware is an inevitable
+      direction in high-speed networks. 
+      As an example, large-scale networks with RDMA (remote direct memory access)
+      often uses hardware-offloading solutions.
+      In some cases, the RDMA networks still face fundamental challenges
+      to reconcile low latency, high bandwidth utilization, and high stability.</t>
+
+    <t>This document describes a new congestion control mechanism, HPCC++ (Enhanced High Precision Congestion Control), 
+      for large-scale, high-speed networks. The key idea behind HPCC++ is to leverage the precise link load 
+      information from signaled through &INT; to compute accurate flow rate updates. Unlike
+      existing approaches that often require a large number of iterations
+      to find the proper flow rates, HPCC++ requires only one rate update
+      step in most cases. Using precise information from &INT; enables
+      HPCC++ to address the limitations in current congestion control schemes. First,
+      HPCC++ senders can quickly ramp up flow rates for high utilization
+      and ramp down flow rates for congestion avoidance. Second, HPCC++
+      senders can quickly adjust the flow rates to keep each link's output rate slightly lower than 
+      the link's capacity, preventing queues from being built-up as well as preserving 
+      high link utilization. Finally, since sending rates are computed precisely based on direct
+      measurements at switches, HPCC++ requires merely three independent
+      parameters that are used to tune fairness and efficiency. </t>
+
+      <t>The base form of HPCC++ is the original HPCC algorithm and its full description can be found 
+      in <xref target="SIGCOMM-HPCC"></xref>. While the original design lays the foundation 
+      for &INT; based precision congestion control, 
+      HPCC++ is an enhanced version which takes into account system constraints and aims to reduce the design 
+      overhead and further improves the performance. <xref target = "sec-implementation"></xref> describes these
+      detailed proposed design enhancements and guidelines. </t>
+      
+      <t>This document describes the architecture changes in switches 
+      and end-hosts to support the needed tranmission of inband telemetry and its consumption, 
+      that imporves the efficiency in handling network congestion. </t>
+
+    </section>
+
+    <section anchor="sec-term" title="Terminology">
+	    
+    <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+   "OPTIONAL" in this document are to be interpreted as described in
+   BCP 14 <xref target="RFC2119"></xref> <xref target="RFC8174"></xref>
+   when, and only when, they appear in all capitals, as shown here.</t>
+    </section>
+
+    <section anchor="sec-system-overview"
+             title="System Overview">
+
+      <t><xref target="fig-system-overview"></xref> shows the end-to-end
+      system that HPCC++ operates in. During
+      the traverse of the packet from the sender to the receiver, each
+      switch along the path inserts &INT; that reports the current state of the
+      packet's egress port, including timestamp (ts), queue length (qLen),
+      transmitted bytes (txBytes), and the link bandwidth capacity (B), 
+      together with switch_ID and port_ID.
+      When the receiver gets the packet, it may copy all the &INT;
+      recorded from the network to the ACK message it sends back to the
+      sender, and then the sender decides how to adjust its flow rate each time it
+      receives an ACK with network load information. Alternatively, the receiver
+      may calculate the flow rate based on the &INT; information and 
+      feedback the calculated rate back to the sender. The notification packets would 
+      include delayed ack information as well. </t>
+
+
+    <t> Note that
+    there also exist network nodes along the reverse (potentially uncongested)
+    path that the feedback reports traverse. Those network nodes are not
+    shown in the figure for sake of brevity.</t>
+
+
+    <t><figure anchor="fig-system-overview"
+               title="System Overview (tlm=inband telemtry)">
+    <artwork><![CDATA[
+
+                             
+  +---------+  pkt    +-------+ pkt+tlm +-------+ pkt+tlm +----------+
+  |  Data   |-------->|       |-------->|       |-------->| Data     |
+  |  Sender |=========|Switch1|=========|Switch2|=========| Receiver |  
+  +---------+ Link-0  +-------+  Link-1 +-------+  Link-2 +----------+
+      /|\                                                        |
+       |                                                         |
+       +---------------------------------------------------------+
+                       Notification Packets/ACKs
+]]></artwork>
+          </figure></t>
+
+  <t><list style="symbols">
+	<t>Data sender: responsible for controlling inflight bytes. HPCC++ is a window-based congestion control scheme that 
+        controls the number of inflight bytes. The inflight bytes mean the amount 
+	      of data that have been sent, but not acknowledged by the sender yet.
+        Controlling inflight bytes has an important advantage compared
+        to controlling rates. In the absence of congestion, the inflight bytes
+        and rate are interchangeable with equation inflight = rate * T
+        where T is the base propagation RTT. The rate can be calculated locally 
+	      or obtained from the notification packet. 
+        The sender may further use the data pacing mechanism, potentially implemented in hardware, to limit the rate accordingly.
+  </t>
+
+	<t> Network nodes: responsible of inserting the &INT; information 
+        to the data packet. The &INT; information reports the current load of the
+        packet's egress port, including timestamp (ts), queue length (qLen),
+	      transmitted bytes (txBytes), and link bandwidth capacity (B).
+        Besides, the &INT; contains switch_ID and port_ID to identify a link.
+ </t>
+
+	<t> Data receiver: responsible for either reflecting back the &INT; information 
+	    in the data packet or calculating the proper flow
+      rate based on network congestion information in &INT; and sending notification packets
+      back to the sender. </t>
+
+  </list></t>
+
+</section>
+
+
+<section anchor="subsec-receiver-algorithm"
+	       title="HPCC++ Algorithm">
+
+  <t>HPCC++ is a window-based congestion
+  control algorithm. The key design choice of HPCC++ is to rely on network nodes to provide
+fine-grained load information, such as queue size and accumulated
+tx/rx traffic to compute precise flow rates. This has two major
+benefits: (i) HPCC++ can quickly converge to proper flow rates to 
+highly utilize bandwidth while avoiding congestion; and (ii) HPCC++
+can consistently maintain a close-to-zero queue for low latency. </t>
+
+
+<t>This section introduces the list of notations and
+  describes the core congestion control algorithm.</t> 
+
+
+<section anchor="subsec-notation"
+	 title = "Notations">
+
+<t>This section summarizes the list of variables and parameters
+used in the HPCC++ algorithm. <xref target="tab-parameters"></xref>
+also includes the default values for choosing the algorithm
+parameters either to represent a typical setting in practical
+applications or based on theoretical and simulation studies.</t>
+
+    <t><figure  anchor="tab-variables"
+                title ="List of variables.">
+        <artwork><![CDATA[
+  +--------------+-------------------------------------------------+
+  | Notation     | Variable Name                                   |
+  +--------------+-------------------------------------------------+
+  | W_i          | Window for flow i                               |
+  | Wc_i         | Reference window for flow i                     |
+  | B_j          | Bandwidth for Link j                            |
+  | I_j          | Estimated inflight bytes for Link j             |
+  | U_j          | Normalized inflight bytes for Link j            |
+  | qlen         | Telemetry info: link j queue length             |  
+  | txRate       | Telemetry info: link j output rate              |
+  | ts           | Telemetry info: timestamp                       |
+  | txBytes      | Telemetry info: link j total transmitted bytes  |
+  |              |                  associated with timestamp ts   |
+  +--------------+-------------------------------------------------+
+        ]]></artwork>    
+    </figure></t>
+       
+
+<t><figure  anchor="tab-parameters"
+    title ="List of algorithm parameters and their default values.">
+<artwork><![CDATA[
+   +--------------+----------------------------------+----------------+
+   | Notation     | Parameter Name                   | Default Value  |
+   +--------------+----------------------------------+----------------+
+   | T            | Known baseline RTT               |    5us         |
+   | eta          | Target link utilization          |    95%         |
+   | maxStage     | Maximum stages for additive      |                |
+   |              | increases                        |    5           |
+   | N            | Maximum number of flows          |    ...         |
+   | W_ai         | Additive increase amount         |    ...         |
+   +--------------+----------------------------------+----------------+
+        ]]></artwork>    
+    </figure></t>
+
+</section>
+
+<section anchor = "subsec-hpcc-algorithm"
+	       title = "Design Functions and Procedures">
+
+<t>The HPCC++ algorithm can be outlined as below:</t>
+    
+<t><figure><artwork><![CDATA[
+1: Function MeasureInflight(ack)
+2:    u = 0;
+3:    for each link i on the path do
+4:                  ack.L[i].txBytes-L[i].txBytes
+          txRate =  ----------------------------- ;
+                         ack.L[i].ts-L[i].ts 
+5:               min(ack.L[i].qlen,L[i].qlen)      txRate
+           u' = ----------------------------- +  ---------- ;
+                     ack.L[i].B*T                ack.L[i].B
+6:         if u' > u then
+7:             u = u'; tau = ack.L[i].ts -  L[i].ts;
+8:     tau = min(tau, T);
+9:     U = (1 - tau/T)*U + tau/T*u;
+10:    return U; 
+]]></artwork></figure></t>
+
+<t><figure><artwork><![CDATA[
+11: Function ComputeWind(U, updateWc)
+12:    if U >= eta or incStage >= maxStagee then
+13:             Wc
+           W = ----- + W_ai;
+               U/eta
+14:        if updateWc then
+15:            incStagee = 0; Wc = W ;
+16:    else
+17:        W = Wc + W_ai ;
+18:        if updateWc then
+19:            incStage++; Wc = W ;
+20:    return W
+]]></artwork></figure></t>
+
+<t><figure><artwork><![CDATA[
+21: Procedure NewAck(ack)
+22:    if ack.seq > lastUpdateSeq then
+23:        W = ComputeWind(MeasureInflight(ack), True);
+24:        lastUpdateSeq = snd_nxt;
+25:    else
+26:        W = ComputeWind(MeasureInflight(ack), False);
+27:    R = W/T; L = ack.L;
+]]></artwork></figure></t>
+
+<t>The above illustrates the overall process of CC at the sender side for
+a single flow. Each newly received ACK message triggers the procedure NewACK at Line 21. At Line 22, the variable lastUpdateSeq
+is used to remember the first packet sent with a new W c
+, and
+the sequence number in the incoming ACK should be larger than
+lastUpdateSeq to trigger a new sync betweenW c
+andW (Line 14-15
+and 18-19). The sender also remembers the pacing rate and current
+&INT; information at Line 27. The sender computes a new window
+size W at Line 23 or Line 26, depending on whether to update W c
+,
+with function MeasureInflight and ComputeWind.
+Function MeasureInflight estimates normalized inflight bytes
+with Eqn (2) at Line 5. First, it computes txRate of each link from
+the current and last accumulated transferred bytes txBytes and
+timestamp ts (Line 4). It also uses the minimum of the current and
+last qlen to filter out noises in qlen (Line 5). The loop from Line 3 to 7
+selects maxi(Ui) in Eqn. (3). Instead of directly using maxi(Ui), we
+use an EWMA (Exponentially Weighted Moving Average) to filter
+the noises from timer inaccuracy and transient queues. (Line 9).
+Function ComputeWind combines multiplicative increase/
+decrease (MI/MD) and additive increase (AI) to balance the reaction
+speed and fairness. If a sender finds it should increase the window
+size, it first tries AI for maxStage times with the stepWAI (Line 17).
+If it still finds room to increase after maxStage times of AI or the
+normalized inflight bytes is above, it calls Eqn (4) once to quickly
+ramp up or ramp down the window size (Line 12-13). </t>
+
+</section>
+
+
+
+</section>
+
+
+<section anchor = "sec-parameters"
+	 title = "Configuration Parameters">
+<t>
+HPCC++ has three easy-to-set parameters: eta, maxStagee, and W_ai. eta
+controls a simple tradeoff between utilization and transient queue
+length (due to the temporary collision of packets caused by their
+random arrivals, so we set it to 95% by default,
+which only loses 5% bandwidth but achieves almost zero queue.
+maxStage controls a simple tradeoff between steady state stability
+and the speed to reclaim free bandwidth. We find maxStage = 5 is
+conservatively large for stability, while the speed of reclaiming free
+bandwidth is still much faster than traditional additive increase,
+especially in high bandwidth networks. W_ai controls the tradeoff
+between the maximum number of concurrent flows on a link that
+can sustain near-zero queues and the speed of convergence to fairness. 
+Note that none of the three
+parameters are reliability-critical. </t>
+
+<t>
+HPCC++'s design brings advantages to short-lived flows, by allowing 
+flows starting at line-rate and the separation of utilization convergence and fairness convergence. HPCC++ 
+achieves fast utilization convergence to mitigate congestion in almost
+one round-trip time, while allows flows to gradually converge to fairness. 
+This design feature of HPCC++ is especially helpful for the workload
+ of datacenter applications, where flows are usually short and latency-sensitive.
+
+Normally we set a very small W_ai to support
+a large number of concurrent flows on a link, because slower fairness 
+is not critical. A rule of thumb is to set W_ai =
+W_init*(1-eta) / N where N is the expected or receiver reported 
+maximum number of concurrent flows on a link. The intuition is that 
+the total additive increase every round
+(N*W_ai ) should not exceed the bandwidth headroom, and thus
+no queue forms. Even if the actual number of concurrent flows on
+a link exceeds N, the CC is still stable and achieves full utilization,
+but just cannot maintain zero queues. 
+
+
+
+
+</t>
+
+</section>
+
+
+
+<!-- <section anchor = "sec-guideline"
+	 title = "HPCC++ Guidelines">
+<t>
+To ensure network stability, HPCC++ establishes a few guidelines for choosing implementations:</t>
+
+ <t><list style="symbols">
+  <t>The algorithm should commit the window/rate update at most once per round-trip time, 
+     similar to the procedure of updating Wc. </t>
+
+  <t>To support different workloads and to properly set W_ai, HPCC++ allows the option to 
+     incorporate mechanisms to speed up the fairness convergence. </t>
+
+
+
+  <t> HPCC++ can use a probe packet to query the &INT; information. Thereby, the probe packets should take the same routing path and QoS queueing with the data packets. </t>
+</list> </t>
+</section> -->
+
+<section anchor = "sec-implementation"
+	 title = "Design enhancement and implementation">
+
+<t>There are three compoments HPCC++ needs to implement: telementry padding, congestion notification, and rate update.</t>
+
+
+
+
+
+
+
+
+<!--
+<section anchor = "subsec-int"
+	       title = "Switch-side Optimizations">
+<t>
+Switches can potentially generate and send separate packets containing &INT; information
+(aka &INT; response packets) directly back to the data senders so that they can slow 
+down as soon as possible. 
+This fast feedback and reaction can further reduce buffer size consumption upon
+heavy incast. Switches can consider the level of congestion to decide when to trigger
+direct &INT; responses. A simple bloom-filter and timer can be used at switches to
+avoid sending a burst of &INT; responses to the same sender.
+An &INT; response packet must carry the sequence number of the original data packet,
+so that the sender can correctly correlate the &INT; response with the data packet
+triggered the &INT; response.
+</t>
+
+
+<t>
+One may optimize the &INT; header overhead by implementing a simple subscription-based &INT;.
+The data senders may use a different DSCP codepoint or a flag bit in the &INT; instruction header
+to indicate &INT; subscription. (We expect future &INT; specs to support such a subscription service.) 
+The senders can selectively subscribe to &INT; on a per-packet basis to control the &INT; data overhead.
+While forwarding &INT;-subscribed data packets, the switches can monitor the level of congestion and
+conditionally generate separate &INT; responses as described above. 
+The &INT; responses can be directly sent back to the senders
+or to the receivers depending on which version of HPCC++ algorithm (sender-based or receiver-based)
+is used in the network.
+</t>
+</section>
+
+-->
+
+<section anchor = "sec-implementation-telemery"
+	 title ="Inband telemetry padding at the network switches">
+   <t>HPCC++ only relies on packets to share information across senders,
+   receivers, and switches. 
+   The switch should capture &INT; information that includes link load (txBytes, qlen, ts) and 
+    link spec (switch_ID, port_ID, B) at the egress port.
+    Note, each switch should record all those information at the single snapshot to achieve a precise link load
+    estimate. Inside a data center, the path length is often no more than 5 hops. 
+   The overhead of the inband telemetry padding for HPCC++ is considered to be low.</t>
+
+
+  <t> As long the above algorithm is met, HPCC++ is open to a variety of inband telemetry format standards, 
+  which are orthogonal to the HPCC++ algorithm. 
+  Although this document does not mandate a particular &INT; header format or encapsulation, 
+  we provide concrete implementation specifications using strandard inband telemetry protocols, 
+  including IFA <xref target="I-D.ietf-kumar-ippm-ifa"></xref>, IETF IOAM <xref target="I-D.ietf-ippm-ioam-data"></xref>,
+  and P4.org INT <xref target="P4-INT"></xref>. 
+  In fact, the emerging inband telemetry protocols inform the evolution for a broader range of protocols and network functions, 
+  where this document leverages the trend to propose the architecture change to support in-network functions like congestion control with high efficiency.
+  </t>
+
+
+  <section anchor = "sec-implementation-ifa"
+	 title ="Inband telemetry on IFA2.0">
+   <t>For more details, please refer to IFA <xref target="I-D.ietf-kumar-ippm-ifa"></xref></t>
+   
+    <t><figure anchor="fig-ifa-header"
+               title="Example IFA header">
+      <artwork><![CDATA[
+
+    0                   1                   2                   3
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |  lns  |  deviceID                             |     rsvd      |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   | Speed |cn |     qid   |          rxTimestampSec               |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |       egressPort              |         ingressPort           |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                        rxTimeStampNs                          |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                         residenceTime                         |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                            txBytes                            |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |       rsvd                    |      Queue Length             |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                             rsvd                              |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                            2nd Hop                            |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                            2nd Hop(lower)                     |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                    Options                    |    Padding    |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+  ]]></artwork>
+	    </figure></t>
+  <t><xref target="fig-ifa-header"></xref> shows the packet format of the
+	  INT metadata after UDP and IFA metadata header. 
+	  The field lns is the local name space and defines the format of the metadata. The field deviceID is a 20-bit field that uniquely identifies the device in the network. 
+	  The Speed field is an encode field with the following encoding for port speed:
+	  0 - 10G, 1 - 25G, 2 - 40G, 3- 50G, 4 - 100G, 5 - 200G, 6 - 400G.
+	  The field cn is the congestion field and denotes if the packet experienced congestion.
+
+  </t>
+   </section>
+
+
+  <section anchor = "sec-implementation-ioam"
+	 title ="Inband telemetry on IOAM">
+   <t>Please refer to IETF IOAM <xref target="I-D.ietf-ippm-ioam-data"></xref></t>
+   </section>
+
+  <section anchor = "sec-implementation-p4"
+	 title ="Inband telemetry on P4">
+
+     <t><figure anchor="fig-p4int"
+               title="Example P4.org INT header">
+   <artwork><![CDATA[
+
+    0                   1                   2                   3
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |  nHop |        pathID         |          Padding              |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   | Speed |                    Timestamp                  |txBytes|
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |      txBytes(lower)           |         Queue Length          |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                            2nd Hop                            |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                            2nd Hop(lower)                     |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                    Options                    |    Padding    |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+  ]]></artwork>
+          </figure></t>
+
+  <t><xref target="fig-p4int"></xref> shows the packet format of the
+INT padding after UDP header. 
+The field nHop is the hop count of the packet's path. The field pathID is the XOR of all the switch
+IDs (which are 12 bits) along the path. The sender sets nHop and
+pathID to 0. Each switch along the path adds nHop by 1, and XORs
+its own switch ID to the pathID. The sender uses pathID to judge
+whether the path of the flow has been changed. If so, it throws away
+the existing status records of the flow and builds up new records.
+
+Each switch has an 8-byte field to record the status of the egress
+port of the packet when the packet is emitted. B is a enum type
+which indicates the speed type of the port(e.g. 40Gbps, 100Gbps, etc.). 
+Timestamp (24 bits) is when the packet is emitted from its egress port,
+txBytes (20 bits) is the accumulative total bytes sent from the egress port,
+and Queue length (16 bits) is the current queue length of the egress port.
+</t>
+
+
+   </section>
+
+   
+
+</section>
+
+  <section anchor = "sec-notification"
+    title = "Congestion Notification">
+
+<t> HPCC++ uses congestion notification to fetch network congestion information from switches 
+for proper rate updates at end-hosts. 
+Although the basic algorithm described in <xref target="subsec-receiver-algorithm"></xref> is to add &INT; information
+into every data packet for optimal performance, HPCC++ supports flexible implementation choices to work seamly with transport protocol stacks.
+We consider congestion nofication choices in both forward and reverse directions of the traffic.
+</t>
+
+  <section anchor = "sec-notification-inband"
+    title ="Forward direction Congestion detection">
+  <t>
+  Forward direction is the traffic direction of data packets that experience bandwidth contention and possible network congestion.
+  The function of congestion notification in forward direction is to fetch &INT; from switches. 
+  HPCC++ defines two approaches of doing this. </t>
+
+  <t>1. Inband with data packet.</t>
+
+  <t>This is basic algorithm setting described in <xref target="subsec-receiver-algorithm"></xref>,
+  where the end-host inserts inband telemetry header into data packets. Switches along the path detect the inband telemetry header 
+  and correspondingly add &INT; information into data packet to react to congestion as soon as the very first packet
+  observing the network congestion. This is especially helpful to reduce the risk
+  of severe congestion in incast scenarios at the first round-trip time. In addition, 
+  original HPCC's algorithm introduction of Wc is for the purpose of solving 
+  the over-reaction issue from using this per-packet response. 
+  
+  Different with in <xref target="subsec-receiver-algorithm"></xref>, end-host can choice uses every data packet or only a subset of data
+  packets to reduce the overhead. To insert telemetry header, differet telemetry protocols have specific settings for IFA, IETF IOAM, and P4.org INT as following.
+  </t>
+  
+  <t>2. Probe packet. </t>
+
+  <t>
+  Switches touching every data packet for &INT; inserting may lead to security or performance concerns, HPCC++ supports 
+  the ``out-of-band'' approach that uses special-generated probe packets at end-hosts to fetch &INT; from switches.
+  Thereby, the probe packets should take the same routing path and QoS queueing with the data packets.
+
+  End-hosts can generate probe packets less frequently and we recommend once per round trip time. 
+  In addition, the end-host issues probe packets only when it has data packet in the flight.
+  
+  </t>
+      </section>
+
+      <section anchor = "sec-notification-probing"
+	      title ="Reverse direction">
+      <t>
+      Reverse direction is the receiver conveying &INT; back to traffic sender for rate updates. 
+      Similar to forward direction, there are also inband and out-of-band approaches.
+      </t>
+
+      <t>
+      1. Inband with ACK packet.</t>
+
+      <t>
+      HPCC++ supports to use the ACK packet in transport protocols to convey the &INT;. 
+      TCP generates ACK packet once per every data packet or per a few data packets. 
+      With ACK packet, the receive sends accumulated &INT; back to sender for rate updates.
+      </t>
+
+      <t>2. Notification packet.</t>
+
+      <t>
+      Using ACK packet for &INT; notification requires transport stack modification 
+      and sometimes leads to delay in notification when certain delayed acknowledged mechanism is used.
+      Hence, HPCC++ allows the receiver to use special-generated notification packets to deliver &INT;.
+      The nofication packet is generated per each probe packet or data packet with &INT;.
+      </t>
+
+      </section>
+
+
+  </section>
+
+
+<section anchor = "sec-implementation-cc"
+	 title ="Congestion control at NICs">
+
+  
+
+  <section anchor = "subsec-txhpcc"
+	       title = "Sender-based HPCC">
+
+   <t><xref target="fig-nic"> </xref> shows HPCC++ implementation on a NIC.
+   The NIC provides an HPCC++ module that resides on the
+   data path of the NIC, HPCC++ modules realize both sender and receiver roles.</t>
+
+
+  <t><figure anchor="fig-nic"
+               title="Overview of NIC Implementation">
+    <artwork><![CDATA[
+
+  +------------------------------------------------------------------+
+  |  +---------+ window update +-----------+ PktSend +-----------+   |
+  |  |         |-------------->| Scheduler |-------> |Tx pipeline|---+->
+  |  |         | rate update   +-----------+         +-----------+   |       
+  |  |  HPCC++ |                                           ^         |
+  |  |         |                           inband telemetry|         |
+  |  |  module |                                           |         |   
+  |  |         |                                     +-----+-----+   | 
+  |  |         |<----------------------------------- |Rx pipeline| <-+--
+  |  +---------+      telemetry response event       +-----------+   |
+  +------------------------------------------------------------------+
+         
+  ]]></artwork>
+          </figure></t>
+
+  <t>1. Sender side flow</t>
+   
+  <t>The HPCC++ module running the HPCC CC algorithm in the sender side for every flow in the NIC. 
+   Flow can be defined by some transport parameters including 5-tuples, destination QP (queue pair), etc.
+   It receives &INT; response events per flow which are generated from the RX pipeline, 
+   adjusts the sending window and rate, and update the scheduler on the rate and window of the flow.</t>
+   	
+  <t>The scheduler contains a pacing mechanism that determine the flow rate by the value it got from the algorithm. 
+   It also maintains the current sending window size for active flows.  
+   If the pacing mechanism and the flow's sending window permits, the 
+   scheduler invokes for the flow a PktSend command to TX pipeline.</t>
+
+   <t>The TX pipeline implements packet processing.
+   Once it receives the PktSend event with flow ID from the scheduler, 
+   it generates the corresponding packet and delivers to the Network.
+   If a sent packet should collect telemetry on its way the TX pipeline may add 
+   indications/headers that triggers the network elements to add telemetry data according to the &INT; protocol in use.
+   The telemetry can be collected by the data packet or by dedicated prob packets generated in the TX pipeline. </t>
+
+   <t>The RX pipe parses the incoming packets from the network and
+   identifies whether telemetry is embedded in the parsed packet. On receiving a telemetry response packet, the RX pipeline extracts the network 
+   status from the packet and passes it to the HPCC++ module for processing.
+   A telemetry response packet can be an ACK containing &INT;, or a dedicated telemetry response prob packet.</t>
+
+  <t>2. Receiver side flow</t>
+
+  <t>On receiving a packet containing &INT;, the RX pipeline extracts the network status, and the flow parameters from the packet
+   and passes it to the TX pipeline. The packet can be a data packet containing &INT;, or a dedicated telemetry request prob packet.
+   The Tx pipeline may process and edit the telemetry data, and then sends back to the sender the data using either an ACK packet of the flow or a dedicated telemetry response packet.</t>
+   </section>
+
+<section anchor = "subsec-rxhpcc"
+	       title = "Receiver-based HPCC">
+<t>
+Note that the window/rate calculation can be implemented at
+either the data sender or the data receiver. 
+If the ACK packets already 
+exist for reliability purpose, the &INT; information can be echoed back to
+the sender via ACK self-clocking. Not all ACK packets need to carry the &INT; information. 
+To reduce the Packet Per Second (PPS) overhead,
+the receiver may examine the &INT; information and adopt the technique of 
+delayed ACKs that only sends out an ACK for a few of received packets. 
+In order to reduce PPS even further, one may implement the algorithm at the receiver and
+feedback the calculated window in the ACK packet once every RTT. 
+</t>
+
+<t>
+The receiver-based algorithm, Rx-HPCC, 
+is based on int.L, which is the &INT; information in the packet header. The receiver
+performs the same functions except using int.L instead of ack.L. The new function NewINT(int.L)
+is to replace NewACK(int.L)
+</t>
+
+<t><figure><artwork><![CDATA[
+28:   Procedure NewINT(int.L)
+29:   if now > (lastUpdateTime + T) then
+30:      W = ComputeWind(MeasureInflight(int), True);
+31:      send_ack(W)
+32:      lastUpdateTime = now;
+33:   else
+34:      W = ComputeWind(MeasureInflight(int), False);
+]]></artwork></figure></t>
+
+<t>
+Here, since the receiver does not know the starting sequence number of a burst, 
+it simply records the lastUpdateTime. If time T has passed since lastUpdateTime, 
+the algorithm would recalcuate Wc as in Line 30 and send out the ACK packet which
+would include W information. Otherwise, it would just update W information locally.
+This would reduce the amount of traffic that needs to be feedback to the data sender.
+</t>
+
+<t>
+Note that the receiver can also measure the number of outstanding flows, N, 
+if the last hop is the congestion point and use this information
+to dynamically adjust W_ai to achieve better fairness. 
+The improvement would allow flows to quickly converge to fairness without causing large swings 
+under heavy load.  
+</t>
+
+</section>
+
+</section>
+
+</section>
+
+
+
+  <section anchor = "sec-reference"
+    title = "Reference Implementation">
+
+    <t>
+      HPCC++ can be adopted as the CC algorithm by a wide range of transport protocols such as TCP and UDP, 
+      as well as others that may run on top of them, such as iWARP, RoCE etc. 
+      It requires to have the window limit and congestion feedback through ACK self-clocking, which naturally conforms to 
+      the paradigm of TCP design. 
+      With that, HPCC++ introduces a scheme to measure the total inflight bytes for 
+      more precise congestion control. To run in UDP, some modifications need to be done to enforce the window limit 
+      and collect congestion feedback via probing packets, 
+      which is incremental. 
+    </t>
+
+    <section anchor = "sec-reference-roce"
+      title = "Implementation on RDMA RoCEv2">
+        <t> 
+      
+       We describe reference implementation on RDMA RoCEv2.
+      This is an implementation for ``Sender-based HPCC++'' (see section 6.3.1.) using dedicated probe packets to collect the telemetry.
+      HPCC++ module in the sender triggers the sending of ``telemetry request packet'' for a given flow. The NIC then sends the probe packet. 
+      The packet will have the same IP and UDP headers as the data packets of the given flow. Such packet is expected to be sent every RTT, see section 6 for more details.  
+      On receiving of telemetry request packet, the NIC extracts the telemetry from all the links along the path from the sender.
+       HPCC++ module chooses the link with the highest inflight bytes and sends its telemetry (queue length, timestamp and tx bytes) back to the receiver on top of dedicated ``telemetry response packet''.
+      On receiving of telemetry response packet, the NIC extracts the telemetry and pass it to the HPCC++ module which using this info to implement the rate update scheme.
+    
+      </t>
+
+    </section>
+
+    <section anchor = "sec-reference-tcp"
+      title = "Implementation on TCP">
+      <t>
+      Taking the benefit of precise congestion control for TCP is a natural next step. 
+      Since TCP segmentation at TX side (e.g., TSO) and coalescing at RX side (e.g., GRO) happen at the NIC HW or low-layer of TCP/IP stack, carrying per-pkt &INT; 
+      info between the TCP congestion control engine and network fabric has to work with the TSO and GRO. 
+      Instead, one way to adopt HPCC++ for TCP is using the special probe and notification packets to retrieve &INT; information. 
+      The sender generates a probe packet when it is actively sending data. The probe packet has the same 5-tuples (source and destination addresses, source and destination ports and protocol number)
+      with the data packets and the &INT; header. The switches along the path identify the probe packet by its &INT; header and insert the &INT;. 
+      Once received the probe packet with &INT;, the receiver replies with a response packet piggybacking the &INT; to the sender. 
+      Note, both probe and response packets use a special DSCP number so that it can bypass the TSO and GRO in each side.  
+
+
+
+       <!-- One possible adoption of HPCC for TCP is condensing the telemetry information into a few bytes fitting into TCP options header. 
+       HPCC algorithm at the end requires the max(U) to make MIMD decision. 
+       Instead of carrying a full stack of raw telemetry data, we carry only the max(U) in the header to fit into the small TCP options header size 
+       limit and to simplify the processing at the NIC/host. In this mode, the calculation of 'normalized U' is offloaded to switches. 
+       Note that this computation is not per-flow, but per-link or -queue operation at the switches with low scale memory requirement. 
+       Each hop switch simply compares the local U value with the value carried in the TCP options header and updates the header value if the local U is larger. 
+       The U field is initialized to zero at the sender, conditionally updated by hop switches, and delivers the max(U) to the receiver, which can directly use 
+       in a receiver-driven mode or echo back to the sender in a sender-driven mode.     
+      
+      In general, the granularity of telemetry tagging in the TCP options header 
+      needs to be adjusted to control its impact on TSO or GRO performance. -->
+
+
+    </t>
+    </section>
+  </section>
+
+<section anchor = "sec-iana"
+	 title = "IANA Considerations">
+
+<t>This document makes no request of IANA.</t>
+
+</section>
+
+<section anchor = "sec-discussion"
+	 title = "Discussion">
+
+
+<section anchor = "sec-Internet"
+	 title = "Internet Deployment">
+
+  <t>Although the discussion above mainly focuses on the data center environment, HPCC++ can be adopted at Internet at large.
+  There are several security considerations one should be aware of.
+  </t>
+
+  <t>There may rise privacy concern when the telemetry information is conveyed across Autonomous Systems (ASes) and back to end-users.
+    The link load information captured in telemetry can potentially reveal the provider's network capacity, route utilization, 
+    scheduling policy, etc. Those usually are considered to be sensitive data of the network providers. Hence, certain action may take to 
+    anonymize the telemetry data and only convey the relative ratio in rate adaptation across ASes without revealing the actual network load.
+  </t>
+
+   <t>Another consideration is the security of receiving telemetry information.
+    The rate adaptation mechanism in HPCC++ relies on feedback
+    from the network. As such, it is vulnerable to attacks where
+    feedback messages are hijacked, replaced, or intentionally
+    injected with misleading information resulting in denial of
+    service, similar to those that can affect TCP. It is therefore
+    RECOMMENDED that the notification feedback message is at least integrity
+    checked. In addition, <xref target="I-D.ietf-avtcore-cc-feedback-message"></xref>
+    discusses the potential risk of a receiver providing misleading
+    congestion feedback information and the mechanisms for mitigating
+    such risks.</t>
+
+</section> 
+
+  <section anchor = "sec-assisted"
+	 title = "Switch-assisted congestion control">
+   
+  <t>HPCC++ falls in the general category of switch-assisted congestion control.
+  However, HPCC++ includes a few unique design choices that are different from other switch-assisted approaches.</t>
+
+  <t><list style="symbols">
+
+  <t>First, HPCC++ implements a primal-mode algorithm that requires only the ``write-to-packet'' operation from switches, 
+  which has already been supported by telemetry protocols like INT <xref target="P4-INT"></xref> or IOAM <xref target="I-D.ietf-ippm-ioam-data"></xref>. 
+  Please note that this is very different from dual-mode algorithms such as XCP <xref target="Katabi-SIGCOMM2002"></xref> 
+  and RCP <xref target="Dukkipati-RCP"></xref>, where switches take an actively role in determining flows' rates.
+  </t>
+  
+  <t>Second, HPCC++ achieves a fast utilization convergence by decoupling it from fairness convergence, which is inspired by XCP.</t>
+
+<t>Third, HPCC++ enables the switch-guided multiplicative increase (MI) by defining the ``inflight byte'' 
+  to quantify the link load. The inflight byte tells both the underload and overload of the link precisely
+  and thus it allows the flow to increase/decrease the rate multiplicatively and safely.
+  By contrast, traditional approaches of using the queue length or RTT as the feedback cannot guide the rate increase 
+  and instead have to rely on additive increase (AI) with heuristics.
+  As the link speed contines to grow, this becomes increasingly slow in reclaiming the unused bandwidth.
+  Besides, queue-based feedback mechanisms subject to latency inflation.
+  </t>
+
+  <t>Last, HPCC++ uses TX rate instead of RX rate used by XCP and RCP. 
+  As detailed in <xref target="SIGCOMM-HPCC"></xref>, we view the TX rate is more precise 
+  because RX rate and queue length are overlapped and thus it causes oscillation.
+  </t>
+  
+  </list></t>
+  </section>
+
+  <section anchor = "sec-QoS"
+	 title = "Work with QoS queuing">
+    
+    <t>Under the use of QoS (Quality of service) priority queuing in switches,
+    the length of flow's own queue cannot tell the actual queuing time and the exact extent of congestion.
+
+    Although general approaches for running congestion control with QoS queuing are out of the scope of this document,
+    we provide a few hints for HPCC++ running friendly with QoS queuing.
+    In this case, HPCC++ can leverage the packet sojourn time 
+    (the egress timestamp minus the ingress timestamp) instead of the queue length to quantify the packet's actual queuing delay.
+    In addition, the operators typically use the Deficit Weighted Round Robin (DWRR) instead of the strict priority (SP) 
+    as their QoS scheduling to prevent traffic starvation.
+    DWRR provides a minimum bandwdith guarantee for each queue so that HPCC++ can leverage it for precise rate update to avoid congestion.
+    </t>
+
+  </section> 
+    <section anchor = "sec-path"
+	 title = "Path migration">
+    
+    <t> HPCC++ allows switches and end-hosts to share precise information of network utilization, which 
+    suggests a framework for path selection and rate control at end-hosts.
+    The framework HPCC++ enabled is to leverage each switch to report its link load information via &INT;.
+    The end-host fetches &INT; along the traffic routes and makes a timely and accurate 
+    decision on path selection and traffic admission.
+    </t>
+
+  </section> 
+</section> 
+
+<section anchor = "sec-acknowledgments"
+	 title = "Acknowledgments">
+
+<t>
+The authors would like to thank RTGWG members for their valuable review
+comments and helpful input to this specification. </t>
+
+</section> 
+
+<section title="Contributors"  
+        anchor="sec-contributors">
+
+<t>The following individuals have contributed to the implementation
+  and evaluation of the proposed scheme, and therefore have helped
+  to validate and substantially improve this specification:
+  Pedro Y. Segura, Roberto P. Cebrian, Robert Southworth and Malek Musleh. </t>
+
+</section>
+
+</middle>
+  
+<back>
+    <references title="Normative References">
+ 
+     &rfc2119;  <!-- RFCs -->
+     &rfc8174;   <!--- Ambiguity of Uppercase vs Lowercase -->
+     </references>
+
+    <references title="Informative References">
+      &I-D.ietf-avtcore-cc-feedback-message; 
+      <reference anchor="Katabi-SIGCOMM2002"
+		 target="">
+        <front>
+          <title>Congestion Control for High Bandwidth-Delay Product Networks
+          </title>
+
+          <author fullname="Dina Katabi" initials="D." surname="Katabi">
+            <organization></organization>
+          </author>
+
+          <author fullname="Mark Handley" initials="M." surname="Handley">
+            <organization></organization>
+          </author>
+
+          <author fullname="Charlie Rohrs" initials="C." surname="Rohrs">
+            <organization></organization>
+          </author>
+          <date month="October" year="2002" />
+        </front>
+
+        <seriesInfo name="ACM SIGCOMM"
+		    value = "Pittsburgh, Pennsylvania, USA"/>
+
+      </reference>
+
+      <reference anchor="Zhu-SIGCOMM2015"
+		 target="">
+        <front>
+          <title>
+	    Congestion Control for Large-Scale RDMA Deployments
+          </title>
+
+          <author fullname="Yibo Zhu" initials="Y." surname="Zhu">
+            <organization></organization>
+          </author>
+
+          <author fullname="Haggai Eran" initials="H." surname="Eran">
+            <organization></organization>
+          </author>
+
+          <author fullname="Daniel Firestone" initials="D." surname="Firestone">
+            <organization></organization>
+          </author>
+
+          <author fullname="Chuanxiong Guo" initials="C." surname="Guo">
+            <organization></organization>
+          </author>
+
+          <author fullname="Marina Lipshteyn" initials="M." surname="Lipshteyn">
+            <organization></organization>
+          </author>
+
+          <author fullname="Yehonatan Liron" initials="Y." surname="Liron">
+            <organization></organization>
+          </author>
+
+          <author fullname="Jitendra Padhye" initials="J." surname="Padhye">
+            <organization></organization>
+          </author>
+
+          <author fullname="Shachar Raindel" initials="S." surname="Raindel">
+            <organization></organization>
+          </author>
+
+          <author fullname="Mohammad Haj Yahia" initials="M. H." surname="Yahia">
+            <organization></organization>
+          </author>
+
+          <author fullname="Ming Zhang" initials="M." surname="Zhang">
+            <organization></organization>
+          </author>
+
+          <date month="August" year="2015" />
+        </front>
+
+        <seriesInfo name="ACM SIGCOMM"
+		    value = "London, United Kingdom"/>
+
+      </reference>
+
+      <reference anchor="P4-INT"
+		 target="https://github.com/p4lang/p4-applications/blob/master/docs/INT_v2_0.pdf">
+        <front>
+          <title>
+	    In-band Network Telemetry (INT) Dataplane Specification, v2.0
+          </title>
+
+          <author >
+            <organization></organization>
+          </author>
+          <date month="February" year="2020" />
+        </front>
+      </reference>
+
+      <reference anchor="I-D.ietf-ippm-ioam-data"
+		 target="https://tools.ietf.org/html/draft-ietf-ippm-ioam-data-09">
+        <front>
+          <title>
+	    Data Fields for In-situ OAM
+          </title>
+
+          <author >
+            <organization></organization>
+          </author>
+          <date month="March" year="2020" />
+        </front>
+      </reference>
+
+
+      <reference anchor="I-D.ietf-kumar-ippm-ifa"
+		 target="https://tools.ietf.org/html/draft-kumar-ippm-ifa-01">
+        <front>
+          <title>
+	    Inband Flow Analyzer
+          </title>
+
+          <author >
+            <organization></organization>
+          </author>
+          <date month="February" year="2019" />
+        </front>
+      </reference>
+
+      <reference anchor="SIGCOMM-HPCC"
+		 target="">
+        <front>
+          <title>
+	    HPCC: High Precision Congestion Control
+          </title>
+
+          <author fullname="Yuliang Li" initials="Y." surname="Li">
+            <organization></organization>
+          </author>
+
+          <author fullname="Rui Miao" initials="R." surname="Miao">
+            <organization></organization>
+          </author>
+
+          <author fullname="Hongqiang Harry Liu" initials="H." surname="Liu">
+            <organization></organization>
+          </author>
+
+          <author fullname="Yan Zhuang" initials="Y." surname="Zhuang">
+            <organization></organization>
+          </author>
+
+          <author fullname="Fei Feng" initials="F." surname="Fei Feng">
+            <organization></organization>
+          </author>
+
+          <author fullname="Lingbo Tang" initials="L." surname="Tang">
+            <organization></organization>
+          </author>
+
+          <author fullname="Zheng Cao" initials="Z." surname="Cao">
+            <organization></organization>
+          </author>
+
+          <author fullname="Ming Zhang" initials="M." surname="Zhang">
+            <organization></organization>
+          </author>
+
+          <author fullname="Frank Kelly" initials="F." surname="Kelly">
+            <organization></organization>
+          </author>
+
+          <author fullname="Mohammad Alizadeh" initials="M." surname="Alizadeh">
+            <organization></organization>
+          </author>
+
+          <author fullname="Minlan Yu" initials="M." surname="Yu">
+            <organization></organization>
+          </author>
+
+          <date month="August" year="2019" />
+        </front>
+
+        <seriesInfo name="ACM SIGCOMM"
+		    value = "Beijing, China"/>
+
+      </reference>
+
+
+    <reference anchor="Dukkipati-RCP"
+		 target="">
+        <front>
+          <title>
+	    Rate Control Protocol (RCP): Congestion control to make flows complete quickly.
+          </title>
+
+          <author fullname="Nandita Dukkipati" initials="N." surname="Dukkipati">
+            <organization></organization>
+          </author>
+
+          <date month="" year="2008" />
+        </front>
+
+        <seriesInfo name="Stanford University"
+		    value = ""/>
+
+      </reference>
+
+     </references>
+  </back>
+</rfc>
