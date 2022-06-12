@@ -18,7 +18,7 @@ Expires: September 8, 2022                                        R. Pan
 
 
            HPCC++: Enhanced High Precision Congestion Control
-                      draft-miao-iccrg-hpccplus-01
+                      draft-miao-rtgwg-hpccplus-00
 
 Abstract
 
@@ -920,7 +920,7 @@ Internet-Draft                   HPCC++                       March 2021
 
 10.  Acknowledgments
 
-   The authors would like to thank ICCRG members for their valuable
+   The authors would like to thank RTGWG members for their valuable
    review comments and helpful input to this specification.
 
 11.  Contributors

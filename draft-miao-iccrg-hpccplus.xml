@@ -10,7 +10,7 @@
 <?rfc compact="yes" ?>
 <?rfc symrefs="yes" ?>
 <rfc category="exp" 
-     docName="draft-miao-iccrg-hpccplus-01"
+     docName="draft-miao-rtgwg-hpccplus-00"
      ipr="trust200902">
   <!-- What is the category field value-->
 
@@ -1013,7 +1013,7 @@ under heavy load.
 	 title = "Acknowledgments">
 
 <t>
-The authors would like to thank ICCRG members for their valuable review
+The authors would like to thank RTGWG members for their valuable review
 comments and helpful input to this specification. </t>
 
 </section> 
