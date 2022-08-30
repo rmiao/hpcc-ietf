@@ -585,6 +585,7 @@ We consider congestion nofication choices in both forward and reverse directions
   Thereby, the probe packets should take the same routing path and QoS queueing with the data packets.
 
   End-hosts can generate probe packets less frequently and we recommend once per round trip time. 
+  This is it sends a new probe packet once it receives the response.
   In addition, the end-host issues probe packets only when it has data packet in the flight.
   
   </t>
