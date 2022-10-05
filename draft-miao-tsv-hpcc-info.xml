@@ -86,10 +86,10 @@
 
       <address>
         <postal>
-          <street>4750 Patrick Henry Dr.</street>
-          <city>Santa Clara</city>
+          <street>101 Innovation Dr</street>
+          <city>San Jose</city>
           <region>CA</region>
-          <code>95054</code>
+          <code>95134</code>
           <country>USA</country>
         </postal>
         <email>jk.lee@intel.com</email>
@@ -277,46 +277,48 @@ easy to deploy in hardware, implementable with commodity NICs and switches.</t>
    </section>
 
   <section anchor = "sec-implementation-p4"
-	 title ="Inband telemetry on P4">
+	 title ="Inband telemetry on P4.org INT">
 
      <t><figure anchor="fig-p4int"
-               title="Example P4.org INT header">
+               title="Example P4.org INT v2.1 per-hop metadata header">
    <artwork><![CDATA[
 
     0                   1                   2                   3
     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |  nHop |        pathID         |          Padding              |
+   |                        Node ID (Nth hop)                      |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   | Speed |                    Timestamp                  |txBytes|
+   |    Queue ID   |               Queue occupnacy                 |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |      txBytes(lower)           |         Queue Length          |
+   |                        Egress timestamp                       |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |                            2nd Hop                            |
+   |                    Egress timestamp (cont'd)                  |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |                            2nd Hop(lower)                     |
+   |                 Egress interface Tx utilization               |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |                    Options                    |    Padding    |
+   |                        Node ID (N-1th hop)                    |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                              ...                              |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                        Node ID (1st hop)                      |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                              ...                              |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
 
   ]]></artwork>
           </figure></t>
 
-  <t><xref target="fig-p4int"></xref> shows the packet format of the
-INT padding after UDP header. 
-The field nHop is the hop count of the packet's path. The field pathID is the XOR of all the switch
-IDs (which are 12 bits) along the path. The sender sets nHop and
-pathID to 0. Each switch along the path adds nHop by 1, and XORs
-its own switch ID to the pathID. The sender uses pathID to judge
-whether the path of the flow has been changed. If so, it throws away
-the existing status records of the flow and builds up new records.
-
-Each switch has an 8-byte field to record the status of the egress
-port of the packet when the packet is emitted. B is a enum type
-which indicates the speed type of the port(e.g. 40Gbps, 100Gbps, etc.). 
-Timestamp (24 bits) is when the packet is emitted from its egress port,
-txBytes (20 bits) is the accumulative total bytes sent from the egress port,
-and Queue length (16 bits) is the current queue length of the egress port.
+  <t><xref target="fig-p4int"></xref> shows the per-hop metadata format of the
+	  P4.org INT-MD mode (following INT v2.1 spec). 
+	  Each hop switch along the path adds its Node ID for the sender to be
+	  able to track the path and detect a path change event. If so, it throws away
+	  the existing status records of the flow and builds up new records.
+	  
+	  Queue occupancy (24 bits) is the current buffer occupancy of the egress port and queue
+	  that the flow is going through. Egress timestamp (8 bytes) is used by HPCC++
+	  algorithm to eventually compute interface utilization. Since P4.org INT reports
+	  Egress TX utilization in-band, the Egress timestsamp is not mandatory but optional.
 </t>
 
 
