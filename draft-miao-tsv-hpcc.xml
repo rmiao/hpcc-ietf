@@ -97,7 +97,7 @@
     </author>
 
     <author fullname="Barak Gafni" initials="B. " surname="Gafni">
-      <organization>Mellanox Technologies, Inc.</organization>
+      <organization>NVIDIA</organization>
       <address>
         <postal>
           <street>350 Oakmead Parkway, Suite 100</street>
@@ -107,12 +107,12 @@
           <country>USA</country>
         </postal>
 
-        <email>gbarak@mellanox.com</email>
+        <email>gbarak@NVIDIA.com</email>
       </address>
     </author>
 
     <author fullname="Yuval Shpigelman" initials="Y. " surname="Shpigelman">
-      <organization>Mellanox Technologies, Inc.</organization>
+      <organization>NVIDIA</organization>
       <address>
         <postal>
           <street>Haim Hazaz 3A</street>

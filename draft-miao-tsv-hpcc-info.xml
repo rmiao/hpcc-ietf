@@ -97,7 +97,7 @@
     </author>
 
     <author fullname="Barak Gafni" initials="B. " surname="Gafni">
-      <organization>Mellanox Technologies, Inc.</organization>
+      <organization>NVIDIA</organization>
       <address>
         <postal>
           <street>350 Oakmead Parkway, Suite 100</street>
@@ -107,12 +107,12 @@
           <country>USA</country>
         </postal>
 
-        <email>gbarak@mellanox.com</email>
+        <email>gbarak@nvidia.com</email>
       </address>
     </author>
 
     <author fullname="Yuval Shpigelman" initials="Y. " surname="Shpigelman">
-      <organization>Mellanox Technologies, Inc.</organization>
+      <organization>NVIDIA</organization>
       <address>
         <postal>
           <street>Haim Hazaz 3A</street>
@@ -282,13 +282,14 @@ easy to deploy in hardware, implementable with commodity NICs and switches.</t>
 	  
 	  <ul bare="false" empty="false" indent="3" spacing="normal">
           <li>Hop_Lim and node_id Short</li>
-		  <li>ingress_if_id and egress_if_id Short</li>
+		  <li>Ingress_if_id and egress_if_id Short</li>
+		  <li>Queue Depth</li>
 		  <li>Timestamp Fraction: To be used as egress timestamp rather than an ingress timestamp</li>
 		  <li>Transmitted Bytes</li>
         </ul>
 	  <t>Note that Transmitted Bytes trace type is defined in <xref target="I-D.draft-gafni-ippm-ioam-additional-data-fields"></xref> as a suggested extension to <xref target="[RFC9179]"></xref>.
 	</t>
-	<t>When using the above trace types, the IOAM data header would be constructed as follows:
+	  <t>When using the above trace types, the IOAM data header would be constructed as follows:</t>
 			  
 	  <t><figure anchor="fig-ioam-data"
                title="Example of an IOAM data header">
@@ -301,6 +302,8 @@ easy to deploy in hardware, implementable with commodity NICs and switches.</t>
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    |     ingress_if_id             |         egress_if_id          |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                       queue depth                             |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    |                   timestamp fraction                          |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    |                           tx_bytes                            |
@@ -308,10 +311,10 @@ easy to deploy in hardware, implementable with commodity NICs and switches.</t>
 
 
   ]]></artwork>
-          </figure></t>
+          </figure>
 	
 	  TBDTBDTBD
-	  </t>
+</t>
    </section>
 
 
