@@ -276,7 +276,7 @@ easy to deploy in hardware, implementable with commodity NICs and switches.</t>
    <t>IOAM is the technology adopted by IETF to be used for in-situ telemetry. For the use of HPCC we would discuss the IOAM trace option as part of the IOAM architecture. IOAM trace supports both 
 	   Pre-allocated and Incremental trace Options, meaning that a node in the network may either write data into an already-allocated space in the packet, or may it add the data as an extenation to the IOAM header, respectively. 
 	   An IOAM data header has a modular design, where the data types written by a node are determined based on the IOAM trace header instruction list.
-	   For the full description of the IOAM header design please refer to IETF IOAM <xref target="[RFC9179]"></xref></t> specification.
+	   For the full description of the IOAM header design please refer to IETF IOAM <xref target="[RFC9179]"></xref> specification.
 	  In order to fulfill the requirements set by the HPCC architecture we would suggest to use the below trace types:
 	  </t>
 	  
