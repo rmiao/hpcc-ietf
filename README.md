@@ -8,6 +8,6 @@ HPCC++ IETF draft
 - or if you are using python2.7 
   - `pip install xml2rfc`
 
-- generate txt file (`xml2rfc SOURCE [options] FORMATS...`)
-  - `xml2rfc draft-iccrg-hpccplus.xml`
+- generate txt file
+  - `make`
 
