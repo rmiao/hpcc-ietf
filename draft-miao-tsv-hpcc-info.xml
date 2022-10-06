@@ -36,7 +36,7 @@
     </author>
 
 
-    <author fullname="Hongqiang H. Liu" initials="H" surname="Liu">
+    <!-- <author fullname="Hongqiang H. Liu" initials="H" surname="Liu">
       <organization>Alibaba Group</organization>
 
       <address>
@@ -49,7 +49,7 @@
         </postal>
         <email>hongqiang.liu@alibaba-inc.com</email>
       </address>
-    </author>
+    </author> -->
 
 
     <author fullname="Surendra Anubolu" initials="S" surname="Anubolu">
