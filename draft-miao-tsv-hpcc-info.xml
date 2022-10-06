@@ -321,6 +321,9 @@ easy to deploy in hardware, implementable with commodity NICs and switches.</t>
 	  that the flow is going through. Egress timestamp (8 bytes) is used by HPCC++
 	  algorithm to eventually compute interface utilization. Since P4.org INT reports
 	  Egress TX utilization in-band, the Egress timestsamp is not mandatory but optional.
+	  
+	  HPCC++ algorithm today doesn't require Ingress Interface ID. P4.org INT defines Ingress
+	  and Egress Interface IDs as one metadata instruction. We keep the Ingress ID for a future use.
 </t>
 
 
