@@ -1,11 +1,14 @@
 .PHONY: all clean dist print
 
 P = draft-miao-tsv-hpcc
+I = draft-miao-tsv-hpcc-info
 
-default : $P.txt
+default : $P.txt $I.txt
 
 $P.txt : $(wildcard *.xml)
 	xml2rfc $P.xml
+$I.txt : $(wildcard *.xml)
+	xml2rfc $I.xml
 
 clean:
-	$(RM) $P.txt
+	$(RM) $P.txt $I.txt
