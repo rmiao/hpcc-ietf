@@ -223,7 +223,7 @@ easy to deploy in hardware, implementable with commodity NICs and switches.</t>
   which are orthogonal to the HPCC++ algorithm. 
   Although this document does not mandate a particular &INT; header format or encapsulation, 
   we provide concrete implementation specifications using strandard inband telemetry protocols, 
-  including IFA <xref target="I-D.ietf-kumar-ippm-ifa"></xref>, IETF IOAM <xref target="I-D.ietf-ippm-ioam-data"></xref>,
+  including IFA <xref target="I-D.ietf-kumar-ippm-ifa"></xref>, IETF IOAM <xref target="[RFC9179]"></xref>,
   and P4.org INT <xref target="P4-INT"></xref>. 
   In fact, the emerging inband telemetry protocols inform the evolution for a broader range of protocols and network functions, 
   where this document leverages the trend to propose the architecture change to support in-network functions like congestion control with high efficiency.
@@ -273,7 +273,45 @@ easy to deploy in hardware, implementable with commodity NICs and switches.</t>
 
   <section anchor = "sec-implementation-ioam"
 	 title ="Inband telemetry on IOAM">
-   <t>Please refer to IETF IOAM <xref target="I-D.ietf-ippm-ioam-data"></xref></t>
+   <t>IOAM is the technology adopted by IETF to be used for in-situ telemetry. For the use of HPCC we would discuss the IOAM trace option as part of the IOAM architecture. IOAM trace supports both 
+	   Pre-allocated and Incremental trace Options, meaning that a node in the network may either write data into an already-allocated space in the packet, or may it add the data as an extenation to the IOAM header, respectively. 
+	   An IOAM data header has a modular design, where the data types written by a node are determined based on the IOAM trace header instruction list.
+	   For the full description of the IOAM header design please refer to IETF IOAM <xref target="[RFC9179]"></xref></t> specification.
+	  In order to fulfill the requirements set by the HPCC architecture we would suggest to use the below trace types:
+	  </t>
+	  
+	  <ul bare="false" empty="false" indent="3" spacing="normal">
+          <li>Hop_Lim and node_id Short</li>
+		  <li>ingress_if_id and egress_if_id Short</li>
+		  <li>Timestamp Fraction: To be used as egress timestamp rather than an ingress timestamp</li>
+		  <li>Transmitted Bytes</li>
+        </ul>
+	  <t>Note that Transmitted Bytes trace type is defined in <xref target="I-D.draft-gafni-ippm-ioam-additional-data-fields"</xref> as a suggested extension to <xref target="[RFC9179]"></xref>.
+	</t>
+	<t>When using the above trace types, the IOAM data header would be constructed as follows:
+			  
+	  <t><figure anchor="fig-ioam-data"
+               title="Example of an IOAM data header">
+   <artwork><![CDATA[
+ 
+    0                   1                   2                   3
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |   Hop_Lim     |              node_id                          |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |     ingress_if_id             |         egress_if_id          |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                   timestamp fraction                          |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                           tx_bytes                            |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+
+  ]]></artwork>
+          </figure></t>
+	
+	  TBDTBDTBD
+	  
    </section>
 
   <section anchor = "sec-implementation-p4"
@@ -444,20 +482,33 @@ comments and helpful input to this specification. </t>
         </front>
       </reference>
 
-      <reference anchor="I-D.ietf-ippm-ioam-data"
-		 target="https://tools.ietf.org/html/draft-ietf-ippm-ioam-data-09">
+      <reference anchor="[RFC9179]"
+		 target="https://datatracker.ietf.org/doc/html/rfc9197">
         <front>
           <title>
-	    Data Fields for In-situ OAM
+	    Data Fields for In Situ Operations, Administration, and Maintenance (IOAM)
           </title>
 
           <author >
             <organization></organization>
           </author>
-          <date month="March" year="2020" />
+          <date month="May" year="2022" />
         </front>
       </reference>
 
+	    <reference anchor="I-D.draft-gafni-ippm-ioam-additional-data-fields"
+		 target="https://datatracker.ietf.org/doc/html/draft-gafni-ippm-ioam-additional-data-fields-00">
+        <front>
+          <title>
+	    Additional data fields for IOAM Trace Option Types
+          </title>
+
+          <author >
+            <organization></organization>
+          </author>
+          <date month="May" year="2021" />
+        </front>
+      </reference>
 
       <reference anchor="I-D.ietf-kumar-ippm-ifa"
 		 target="https://tools.ietf.org/html/draft-kumar-ippm-ifa-01">
