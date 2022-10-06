@@ -287,9 +287,9 @@ easy to deploy in hardware, implementable with commodity NICs and switches.</t>
 		  <li>Timestamp Fraction: To be used as egress timestamp rather than an ingress timestamp</li>
 		  <li>Transmitted Bytes</li>
         </ul>
-	  <t>Note that Transmitted Bytes trace type is defined in <xref target="I-D.draft-gafni-ippm-ioam-additional-data-fields"</xref> as a suggested extension to <xref target="[RFC9179]"></xref>.
+	  <t>Note that Transmitted Bytes trace type is defined in <xref target="I-D.draft-gafni-ippm-ioam-additional-data-fields"></xref> as a suggested extension to <xref target="[RFC9179]"></xref>.
 	</t>
-	<t>When using the above trace types, the IOAM data header would be constructed as follows:
+	  <t>When using the above trace types, the IOAM data header would be constructed as follows:</t>
 			  
 	  <t><figure anchor="fig-ioam-data"
                title="Example of an IOAM data header">
