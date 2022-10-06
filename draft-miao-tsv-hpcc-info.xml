@@ -283,7 +283,7 @@ easy to deploy in hardware, implementable with commodity NICs and switches.</t>
 	  <ul bare="false" empty="false" indent="3" spacing="normal">
           <li>Hop_Lim and node_id Short</li>
 		  <li>Ingress_if_id and egress_if_id Short</li>
-		  <li>Queue Depth
+		  <li>Queue Depth</li>
 		  <li>Timestamp Fraction: To be used as egress timestamp rather than an ingress timestamp</li>
 		  <li>Transmitted Bytes</li>
         </ul>
