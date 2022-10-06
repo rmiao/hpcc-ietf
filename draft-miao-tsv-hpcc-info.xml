@@ -276,7 +276,7 @@ easy to deploy in hardware, implementable with commodity NICs and switches.</t>
    <t>IOAM is the technology adopted by IETF to be used for in-situ telemetry. For the use of HPCC we would discuss the IOAM trace option as part of the IOAM architecture. IOAM trace supports both 
 	   Pre-allocated and Incremental trace Options, meaning that a node in the network may either write data into an already-allocated space in the packet, or may it add the data as an extenation to the IOAM header, respectively. 
 	   An IOAM data header has a modular design, where the data types written by a node are determined based on the IOAM trace header instruction list.
-	   For the full description of the IOAM header design please refer to IETF IOAM <xref target="[RFC9179]"></xref></t> specification.
+	   For the full description of the IOAM header design please refer to IETF IOAM <xref target="[RFC9179]"></xref> specification.
 	  In order to fulfill the requirements set by the HPCC architecture we would suggest to use the below trace types:
 	  </t>
 	  
@@ -286,7 +286,7 @@ easy to deploy in hardware, implementable with commodity NICs and switches.</t>
 		  <li>Timestamp Fraction: To be used as egress timestamp rather than an ingress timestamp</li>
 		  <li>Transmitted Bytes</li>
         </ul>
-	  <t>Note that Transmitted Bytes trace type is defined in <xref target="I-D.draft-gafni-ippm-ioam-additional-data-fields"</xref> as a suggested extension to <xref target="[RFC9179]"></xref>.
+	  <t>Note that Transmitted Bytes trace type is defined in <xref target="I-D.draft-gafni-ippm-ioam-additional-data-fields"></xref> as a suggested extension to <xref target="[RFC9179]"></xref>.
 	</t>
 	<t>When using the above trace types, the IOAM data header would be constructed as follows:
 			  
@@ -311,8 +311,9 @@ easy to deploy in hardware, implementable with commodity NICs and switches.</t>
           </figure></t>
 	
 	  TBDTBDTBD
-	  
+	  </t>
    </section>
+
 
   <section anchor = "sec-implementation-p4"
 	 title ="Inband telemetry on P4.org INT">

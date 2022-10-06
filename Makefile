@@ -1,4 +1,4 @@
-.PHONY: all clean dist print
+.PHONY: all clean
 
 P = draft-miao-tsv-hpcc
 I = draft-miao-tsv-hpcc-info
