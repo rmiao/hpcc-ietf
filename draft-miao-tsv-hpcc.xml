@@ -1,18 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-model href="rfc7991bis.rnc"?>  <!-- Required for schema validation and schema-aware editing -->
+<!-- <?xml-stylesheet type="text/xsl" href="rfc2629.xslt" ?> -->
+<!-- This third-party XSLT can be enabled for direct transformations in XML processors, including most browsers -->
+
+
+<!DOCTYPE rfc [
+  <!ENTITY nbsp    "&#160;">
+  <!ENTITY zwsp   "&#8203;">
+  <!ENTITY nbhy   "&#8209;">
+  <!ENTITY wj     "&#8288;">
+  <!ENTITY rfc2119 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml">
+  <!ENTITY rfc8174 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8174.xml">
+  <!ENTITY INT "inband telemetry">
+  <!ENTITY I-D.ietf-avtcore-cc-feedback-message SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-avtcore-cc-feedback-message.xml">
+]>
+<!-- If further character entities are required then they should be added to the DOCTYPE above.
+     Use of an external entity file is not recommended. -->
+
+<rfc
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  category="std"
+  docName="draft-miao-tsv-hpcc-00"
+  ipr="trust200902"
+  obsoletes=""
+  updates=""
+  submissionType="IETF"
+  xml:lang="en"
+  version="3"
+  consensus="true">
+<!-- [REPLACE] 
+       * docName with name of your draft
+     [CHECK] 
+       * category should be one of std, bcp, info, exp, historic
+       * ipr should be one of trust200902, noModificationTrust200902, noDerivativesTrust200902, pre5378Trust200902
+       * updates can be an RFC number as NNNN
+       * obsoletes can be an RFC number as NNNN 
+-->
+<!-- 
 <?xml version="1.0" encoding="US-ASCII"?>
 <!DOCTYPE rfc SYSTEM "rfc2629.dtd" [
 <!ENTITY rfc2119 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml">
 <!ENTITY rfc8174 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8174.xml">
 <!ENTITY INT "inband telemetry">
 <!ENTITY I-D.ietf-avtcore-cc-feedback-message SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-avtcore-cc-feedback-message.xml">
-]>
-<?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
+]> -->
+<!-- <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
 <?rfc toc="yes" ?>
 <?rfc compact="yes" ?>
 <?rfc symrefs="yes" ?>
 <rfc category="std" 
-     docName="draft-miao-tsv-hpcc-00"
+     docName=""
      ipr="trust200902">
-  <!-- What is the category field value-->
+  What is the category field value -->
 
   <front>
     <title abbrev="HPCC++">
@@ -243,24 +282,25 @@ easy to deploy in hardware, implementable with commodity NICs and switches.</t>
     shown in the figure for sake of brevity.</t>
 
 
-    <t><figure anchor="fig-system-overview"
+    <figure anchor="fig-system-overview"
                title="System Overview (tlm=inband telemtry)">
     <artwork><![CDATA[
 
                              
-  +---------+  pkt    +-------+ pkt+tlm +-------+ pkt+tlm +----------+
-  |  Data   |-------->|       |-------->|       |-------->| Data     |
-  |  Sender |=========|Switch1|=========|Switch2|=========| Receiver |  
-  +---------+ Link-0  +-------+  Link-1 +-------+  Link-2 +----------+
+  +--------+  pkt    +-------+ pkt+tlm +-------+ pkt+tlm +---------+
+  | Data   |-------->|       |-------->|       |-------->| Data    |
+  | Sender |=========|Switch1|=========|Switch2|=========| Receiver|  
+  +--------+ Link-0  +-------+  Link-1 +-------+  Link-2 +---------+
       /|\                                                        |
        |                                                         |
        +---------------------------------------------------------+
                        Notification Packets/ACKs
 ]]></artwork>
-          </figure></t>
+          </figure>
 
-  <t><list style="symbols">
-	<t>Data sender: responsible for controlling inflight bytes. HPCC++ is a window-based congestion control scheme that 
+  <!-- <t><list style="symbols"> -->
+  <ul>
+	<li>Data sender: responsible for controlling inflight bytes. HPCC++ is a window-based congestion control scheme that 
         controls the number of inflight bytes. The inflight bytes mean the amount 
 	      of data that have been sent, but not acknowledged by the sender yet.
         Controlling inflight bytes has an important advantage compared
@@ -269,21 +309,21 @@ easy to deploy in hardware, implementable with commodity NICs and switches.</t>
         where T is the base propagation RTT. The rate can be calculated locally 
 	      or obtained from the notification packet. 
         The sender may further use the data pacing mechanism, potentially implemented in hardware, to limit the rate accordingly.
-  </t>
+  </li>
 
-	<t> Network nodes: responsible of inserting the &INT; information 
+	<li> Network nodes: responsible of inserting the &INT; information 
         to the data packet. The &INT; information reports the current load of the
         packet's egress port, including timestamp (ts), queue length (qLen),
 	      transmitted bytes (txBytes), and link bandwidth capacity (B).
         Besides, the &INT; contains switch_ID and port_ID to identify a link.
- </t>
+ </li>
 
-	<t> Data receiver: responsible for either reflecting back the &INT; information 
+	<li> Data receiver: responsible for either reflecting back the &INT; information 
 	    in the data packet or calculating the proper flow
       rate based on network congestion information in &INT; and sending notification packets
-      back to the sender. </t>
-
-  </list></t>
+      back to the sender. </li>
+</ul>
+  <!-- </list></t> -->
 
 </section>
 
@@ -313,7 +353,7 @@ also includes the default values for choosing the algorithm
 parameters either to represent a typical setting in practical
 applications or based on theoretical and simulation studies.</t>
 
-    <t><figure  anchor="tab-variables"
+    <figure  anchor="tab-variables"
                 title ="List of variables.">
         <artwork><![CDATA[
   +--------------+-------------------------------------------------+
@@ -331,24 +371,24 @@ applications or based on theoretical and simulation studies.</t>
   |              |                  associated with timestamp ts   |
   +--------------+-------------------------------------------------+
         ]]></artwork>    
-    </figure></t>
+    </figure>
        
 
-<t><figure  anchor="tab-parameters"
+<figure  anchor="tab-parameters"
     title ="List of algorithm parameters and their default values.">
 <artwork><![CDATA[
-   +--------------+----------------------------------+----------------+
-   | Notation     | Parameter Name                   | Default Value  |
-   +--------------+----------------------------------+----------------+
-   | T            | Known baseline RTT               |    5us         |
-   | eta          | Target link utilization          |    95%         |
-   | maxStage     | Maximum stages for additive      |                |
-   |              | increases                        |    5           |
-   | N            | Maximum number of flows          |    ...         |
-   | W_ai         | Additive increase amount         |    ...         |
-   +--------------+----------------------------------+----------------+
+   +--------------+--------------------------------+----------------+
+   | Notation     | Parameter Name                 | Default Value  |
+   +--------------+--------------------------------+----------------+
+   | T            | Known baseline RTT             |    5us         |
+   | eta          | Target link utilization        |    95%         |
+   | maxStage     | Maximum stages for additive    |                |
+   |              | increases                      |    5           |
+   | N            | Maximum number of flows        |    ...         |
+   | W_ai         | Additive increase amount       |    ...         |
+   +--------------+--------------------------------+----------------+
         ]]></artwork>    
-    </figure></t>
+    </figure>
 
 </section>
 
@@ -357,7 +397,7 @@ applications or based on theoretical and simulation studies.</t>
 
 <t>The HPCC++ algorithm can be outlined as below:</t>
     
-<t><figure><artwork><![CDATA[
+<figure><artwork><![CDATA[
 1: Function MeasureInflight(ack)
 2:    u = 0;
 3:    for each link i on the path do
@@ -372,9 +412,9 @@ applications or based on theoretical and simulation studies.</t>
 8:     tau = min(tau, T);
 9:     U = (1 - tau/T)*U + tau/T*u;
 10:    return U; 
-]]></artwork></figure></t>
+]]></artwork></figure>
 
-<t><figure><artwork><![CDATA[
+<figure><artwork><![CDATA[
 11: Function ComputeWind(U, updateWc)
 12:    if U >= eta or incStage >= maxStagee then
 13:             Wc
@@ -387,9 +427,9 @@ applications or based on theoretical and simulation studies.</t>
 18:        if updateWc then
 19:            incStage++; Wc = W ;
 20:    return W
-]]></artwork></figure></t>
+]]></artwork></figure>
 
-<t><figure><artwork><![CDATA[
+<figure><artwork><![CDATA[
 21: Procedure NewAck(ack)
 22:    if ack.seq > lastUpdateSeq then
 23:        W = ComputeWind(MeasureInflight(ack), True);
@@ -397,7 +437,7 @@ applications or based on theoretical and simulation studies.</t>
 25:    else
 26:        W = ComputeWind(MeasureInflight(ack), False);
 27:    R = W/T; L = ack.L;
-]]></artwork></figure></t>
+]]></artwork></figure>
 
 <t>The above illustrates the overall process of CC at the sender side for
 a single flow. Each newly received ACK message triggers the procedure NewACK at Line 21. At Line 22, the variable lastUpdateSeq
@@ -635,24 +675,24 @@ We consider congestion nofication choices in both forward and reverse directions
    data path of the NIC, HPCC++ modules realize both sender and receiver roles.</t>
 
 
-  <t><figure anchor="fig-nic"
+  <figure anchor="fig-nic"
                title="Overview of NIC Implementation">
     <artwork><![CDATA[
 
-  +------------------------------------------------------------------+
-  |  +---------+ window update +-----------+ PktSend +-----------+   |
-  |  |         |-------------->| Scheduler |-------> |Tx pipeline|---+->
-  |  |         | rate update   +-----------+         +-----------+   |       
-  |  |  HPCC++ |                                           ^         |
-  |  |         |                           inband telemetry|         |
-  |  |  module |                                           |         |   
-  |  |         |                                     +-----+-----+   | 
-  |  |         |<----------------------------------- |Rx pipeline| <-+--
-  |  +---------+      telemetry response event       +-----------+   |
-  +------------------------------------------------------------------+
+  +---------------------------------------------------------------+
+  | +--------+ window update +-----------+ PktSend +-----------+  |
+  | |        |-------------->| Scheduler |-------> |Tx pipeline|--+->
+  | |        | rate update   +-----------+         +-----------+  |       
+  | | HPCC++ |                                           ^        |
+  | |        |                           inband telemetry|        |
+  | | module |                                           |        |   
+  | |        |                                     +-----+-----+  | 
+  | |        |<----------------------------------- |Rx pipeline|<-+--
+  | +--------+      telemetry response event       +-----------+  |
+  +---------------------------------------------------------------+
          
   ]]></artwork>
-          </figure></t>
+          </figure>
 
   <t>1. Sender side flow</t>
    
@@ -707,7 +747,7 @@ performs the same functions except using int.L instead of ack.L. The new functio
 is to replace NewACK(int.L)
 </t>
 
-<t><figure><artwork><![CDATA[
+<figure><artwork><![CDATA[
 28:   Procedure NewINT(int.L)
 29:   if now > (lastUpdateTime + T) then
 30:      W = ComputeWind(MeasureInflight(int), True);
@@ -715,7 +755,7 @@ is to replace NewACK(int.L)
 32:      lastUpdateTime = now;
 33:   else
 34:      W = ComputeWind(MeasureInflight(int), False);
-]]></artwork></figure></t>
+]]></artwork></figure>
 
 <t>
 Here, since the receiver does not know the starting sequence number of a burst, 
@@ -846,31 +886,31 @@ under heavy load.
   <t>HPCC++ falls in the general category of switch-assisted congestion control.
   However, HPCC++ includes a few unique design choices that are different from other switch-assisted approaches.</t>
 
-  <t><list style="symbols">
+  <!-- <t><list style="symbols"> -->
+  <ul>
+    <li>First, HPCC++ implements a primal-mode algorithm that requires only the ``write-to-packet'' operation from switches, 
+    which has already been supported by telemetry protocols like INT <xref target="P4-INT"></xref> or IOAM <xref target="I-D.ietf-ippm-ioam-data"></xref>. 
+    Please note that this is very different from dual-mode algorithms such as XCP <xref target="Katabi-SIGCOMM2002"></xref> 
+    and RCP <xref target="Dukkipati-RCP"></xref>, where switches take an actively role in determining flows' rates.
+    </li>
+    
+  <li>Second, HPCC++ achieves a fast utilization convergence by decoupling it from fairness convergence, which is inspired by XCP.</li>
 
-  <t>First, HPCC++ implements a primal-mode algorithm that requires only the ``write-to-packet'' operation from switches, 
-  which has already been supported by telemetry protocols like INT <xref target="P4-INT"></xref> or IOAM <xref target="I-D.ietf-ippm-ioam-data"></xref>. 
-  Please note that this is very different from dual-mode algorithms such as XCP <xref target="Katabi-SIGCOMM2002"></xref> 
-  and RCP <xref target="Dukkipati-RCP"></xref>, where switches take an actively role in determining flows' rates.
-  </t>
-  
-  <t>Second, HPCC++ achieves a fast utilization convergence by decoupling it from fairness convergence, which is inspired by XCP.</t>
-
-<t>Third, HPCC++ enables the switch-guided multiplicative increase (MI) by defining the ``inflight byte'' 
+<li>Third, HPCC++ enables the switch-guided multiplicative increase (MI) by defining the ``inflight byte'' 
   to quantify the link load. The inflight byte tells both the underload and overload of the link precisely
   and thus it allows the flow to increase/decrease the rate multiplicatively and safely.
   By contrast, traditional approaches of using the queue length or RTT as the feedback cannot guide the rate increase 
   and instead have to rely on additive increase (AI) with heuristics.
   As the link speed contines to grow, this becomes increasingly slow in reclaiming the unused bandwidth.
   Besides, queue-based feedback mechanisms subject to latency inflation.
-  </t>
+  </li>
 
-  <t>Last, HPCC++ uses TX rate instead of RX rate used by XCP and RCP. 
+  <li>Last, HPCC++ uses TX rate instead of RX rate used by XCP and RCP. 
   As detailed in <xref target="SIGCOMM-HPCC"></xref>, we view the TX rate is more precise 
   because RX rate and queue length are overlapped and thus it causes oscillation.
-  </t>
-  
-  </list></t>
+  </li>
+  </ul>
+  <!-- </list></t> -->
   </section>
 
   <section anchor = "sec-QoS"
@@ -957,7 +997,7 @@ comments and helpful input to this specification. </t>
 
       </reference>
 
-      <reference anchor="draft-miao-tsv-hpcc"
+      <!-- <reference anchor="draft-miao-tsv-hpcc"
 		 target="">
         <front>
           <title>HPCC++: Enhanced High Precision Congestion Control
@@ -969,7 +1009,7 @@ comments and helpful input to this specification. </t>
           <date month="June" year="2022" />
         </front>
 
-      </reference>
+      </reference> -->
 
             <reference anchor="draft-miao-tsv-hpcc-info"
 		 target="">
@@ -1068,7 +1108,7 @@ comments and helpful input to this specification. </t>
       </reference>
 
 
-      <reference anchor="I-D.ietf-kumar-ippm-ifa"
+      <!-- <reference anchor="I-D.ietf-kumar-ippm-ifa"
 		 target="https://tools.ietf.org/html/draft-kumar-ippm-ifa-01">
         <front>
           <title>
@@ -1080,7 +1120,7 @@ comments and helpful input to this specification. </t>
           </author>
           <date month="February" year="2019" />
         </front>
-      </reference>
+      </reference> -->
 
       <reference anchor="SIGCOMM-HPCC"
 		 target="">

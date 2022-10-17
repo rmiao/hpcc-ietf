@@ -1,4 +1,36 @@
-<?xml version="1.0" encoding="US-ASCII"?>
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-model href="rfc7991bis.rnc"?>  <!-- Required for schema validation and schema-aware editing -->
+<!-- <?xml-stylesheet type="text/xsl" href="rfc2629.xslt" ?> -->
+<!-- This third-party XSLT can be enabled for direct transformations in XML processors, including most browsers -->
+
+
+<!DOCTYPE rfc [
+  <!ENTITY nbsp    "&#160;">
+  <!ENTITY zwsp   "&#8203;">
+  <!ENTITY nbhy   "&#8209;">
+  <!ENTITY wj     "&#8288;">
+  <!-- <!ENTITY rfc2119 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml"> -->
+  <!-- <!ENTITY rfc8174 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8174.xml"> -->
+  <!ENTITY INT "inband telemetry">
+  <!-- <!ENTITY I-D.ietf-avtcore-cc-feedback-message SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-avtcore-cc-feedback-message.xml"> -->
+]>
+<!-- If further character entities are required then they should be added to the DOCTYPE above.
+     Use of an external entity file is not recommended. -->
+
+<rfc
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  category="info"
+  docName="draft-miao-tsv-hpcc-info"
+  ipr="trust200902"
+  obsoletes=""
+  updates=""
+  submissionType="IETF"
+  xml:lang="en"
+  version="3"
+  consensus="true">
+
+
+<!-- <?xml version="1.0" encoding="US-ASCII"?>
 <!DOCTYPE rfc SYSTEM "rfc2629.dtd" [
 <!ENTITY rfc2119 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml">
 <!ENTITY rfc8174 SYSTEM "http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8174.xml">
@@ -12,11 +44,12 @@
 <rfc category="info" 
      docName="draft-miao-tsv-hpcc-info"
      ipr="trust200902">
-  <!-- What is the category field value-->
+  What is the category field value -->
+
 
   <front>
     <title abbrev="HPCC++">
-    HPCC++: Enhanced High Precision Congestion Control
+    Inband Telemetry for HPCC++
     </title>
     
     
@@ -200,7 +233,8 @@ easy to deploy in hardware, implementable with commodity NICs and switches.</t>
 
       <t>HPCC++ is an enhanced version of <xref target="SIGCOMM-HPCC"></xref>. 
       HPCC++ takes into account system constraints and aims to reduce the design 
-      overhead and further improves the performance. </t>
+      overhead and further improves the performance. Detailed specification about HPCC++ can be found at 
+      <xref target="draft-miao-tsv-hpcc"></xref>.</t>
       
       <t>This document describes the architecture changes in switches 
       and end-hosts to support the needed tranmission of inband telemetry and its consumption, 
@@ -223,7 +257,7 @@ easy to deploy in hardware, implementable with commodity NICs and switches.</t>
   which are orthogonal to the HPCC++ algorithm. 
   Although this document does not mandate a particular &INT; header format or encapsulation, 
   we provide concrete implementation specifications using strandard inband telemetry protocols, 
-  including IFA <xref target="I-D.ietf-kumar-ippm-ifa"></xref>, IETF IOAM <xref target="[RFC9179]"></xref>,
+  including IFA <xref target="I-D.ietf-kumar-ippm-ifa"></xref>, IETF IOAM <xref target="RFC9179"></xref>,
   and P4.org INT <xref target="P4-INT"></xref>. 
   In fact, the emerging inband telemetry protocols inform the evolution for a broader range of protocols and network functions, 
   where this document leverages the trend to propose the architecture change to support in-network functions like congestion control with high efficiency.
@@ -234,7 +268,7 @@ easy to deploy in hardware, implementable with commodity NICs and switches.</t>
 	 title ="Inband telemetry on IFA2.0">
    <t>For more details, please refer to IFA <xref target="I-D.ietf-kumar-ippm-ifa"></xref></t>
    
-    <t><figure anchor="fig-ifa-header"
+    <figure anchor="fig-ifa-header"
                title="Example IFA header">
       <artwork><![CDATA[
 
@@ -259,7 +293,7 @@ easy to deploy in hardware, implementable with commodity NICs and switches.</t>
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
   ]]></artwork>
-	    </figure></t>
+	    </figure>
   <t><xref target="fig-ifa-header"></xref> shows the packet format of the
 	  INT metadata after UDP and IFA metadata header. 
 	  The field lns is the local name space and defines the format of the metadata. The field deviceID is a 20-bit field that uniquely identifies the device in the network. 
@@ -273,11 +307,12 @@ easy to deploy in hardware, implementable with commodity NICs and switches.</t>
 
   <section anchor = "sec-implementation-ioam"
 	 title ="Inband telemetry on IOAM">
-   <t>IOAM is the technology adopted by IETF to be used for in-situ telemetry. For the use of HPCC we would discuss the IOAM trace option as part of the IOAM architecture. IOAM trace supports both 
+   
+   <t>IOAM is the technology adopted by IETF to be used for in-situ telemetry. For the use of HPCC++ we would discuss the IOAM trace option as part of the IOAM architecture. IOAM trace supports both 
 	   Pre-allocated and Incremental trace Options, meaning that a node in the network may either write data into an already-allocated space in the packet, or may it add the data as an extenation to the IOAM header, respectively. 
 	   An IOAM data header has a modular design, where the data types written by a node are determined based on the IOAM trace header instruction list.
-	   For the full description of the IOAM header design please refer to IETF IOAM <xref target="[RFC9179]"></xref> specification.
-	  In order to fulfill the requirements set by the HPCC architecture we would suggest to use the below trace types:
+	   For the full description of the IOAM header design please refer to IETF IOAM <xref target="RFC9179"></xref> specification.
+	  In order to fulfill the requirements set by the HPCC++ architecture we would suggest to use the below trace types:
 	  </t>
 	  
 	  <ul bare="false" empty="false" indent="3" spacing="normal">
@@ -287,11 +322,11 @@ easy to deploy in hardware, implementable with commodity NICs and switches.</t>
 		  <li>Timestamp Fraction: To be used as egress timestamp rather than an ingress timestamp</li>
 		  <li>Transmitted Bytes</li>
         </ul>
-	  <t>Note that Transmitted Bytes trace type is defined in <xref target="I-D.draft-gafni-ippm-ioam-additional-data-fields"></xref> as a suggested extension to <xref target="[RFC9179]"></xref>.
+	  <t>Note that Transmitted Bytes trace type is defined in <xref target="I-D.draft-gafni-ippm-ioam-additional-data-fields"></xref> as a suggested extension to <xref target="RFC9179"></xref>.
 	</t>
 	  <t>When using the above trace types, the IOAM data header would be constructed as follows:</t>
 			  
-	  <t><figure anchor="fig-ioam-data"
+	  <figure anchor="fig-ioam-data"
                title="Example of an IOAM data header">
    <artwork><![CDATA[
  
@@ -313,15 +348,15 @@ easy to deploy in hardware, implementable with commodity NICs and switches.</t>
   ]]></artwork>
           </figure>
 	
-	  TBDTBDTBD
-</t>
+
+
    </section>
 
 
   <section anchor = "sec-implementation-p4"
 	 title ="Inband telemetry on P4.org INT">
 
-     <t><figure anchor="fig-p4int"
+     <figure anchor="fig-p4int"
                title="Example P4.org INT v2.1 per-hop metadata header">
    <artwork><![CDATA[
 
@@ -351,7 +386,7 @@ easy to deploy in hardware, implementable with commodity NICs and switches.</t>
 
 
   ]]></artwork>
-          </figure></t>
+          </figure>
 
   <t><xref target="fig-p4int"></xref> shows the per-hop metadata format of the
 	  P4.org INT-MD mode (following INT v2.1 spec). 
@@ -409,12 +444,12 @@ comments and helpful input to this specification. </t>
 
      <references title="Normative References">
  
-     &rfc2119;  <!-- RFCs -->
-     &rfc8174;   <!--- Ambiguity of Uppercase vs Lowercase -->
+     <!-- &rfc2119;  RFCs -->
+     <!-- &rfc8174;   - Ambiguity of Uppercase vs Lowercase -->
      </references>
 
     <references title="Informative References">
-      &I-D.ietf-avtcore-cc-feedback-message; 
+      <!-- &I-D.ietf-avtcore-cc-feedback-message;  -->
       
 
 <reference anchor="Zhu-SIGCOMM2015"
@@ -486,7 +521,7 @@ comments and helpful input to this specification. </t>
         </front>
       </reference>
 
-      <reference anchor="[RFC9179]"
+      <reference anchor="RFC9179"
 		 target="https://datatracker.ietf.org/doc/html/rfc9197">
         <front>
           <title>
@@ -542,7 +577,7 @@ comments and helpful input to this specification. </t>
 
       </reference>
 
-            <reference anchor="draft-miao-tsv-hpcc-info"
+            <!-- <reference anchor="draft-miao-tsv-hpcc-info"
 		 target="">
         <front>
           <title>HPCC++: Enhanced High Precision Congestion Control (Informational)
@@ -553,7 +588,7 @@ comments and helpful input to this specification. </t>
           <date month="June" year="2022" />
         </front>
 
-      </reference>
+      </reference> -->
 
 
       <reference anchor="SIGCOMM-HPCC"
