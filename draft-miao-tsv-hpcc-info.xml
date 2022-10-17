@@ -20,14 +20,13 @@
 <rfc
   xmlns:xi="http://www.w3.org/2001/XInclude"
   category="info"
-  docName="draft-miao-tsv-hpcc-info"
+  docName="draft-miao-tsv-hpcc-info-00"
   ipr="trust200902"
   obsoletes=""
   updates=""
   submissionType="IETF"
   xml:lang="en"
-  version="3"
-  consensus="true">
+  version="3">
 
 
 <!-- <?xml version="1.0" encoding="US-ASCII"?>
