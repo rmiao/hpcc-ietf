@@ -364,7 +364,7 @@ easy to deploy in hardware, implementable with commodity NICs and switches.</t>
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    |                        Node ID (Nth hop)                      |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |      Ingress Interface ID     |      Egress Interface ID      | 
+   |            Reserved           |      Egress Interface ID      | 
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    |    Queue ID   |               Queue occupnacy                 |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -398,8 +398,8 @@ easy to deploy in hardware, implementable with commodity NICs and switches.</t>
 	  algorithm to eventually compute interface utilization. Since P4.org INT reports
 	  Egress TX utilization in-band, the Egress timestsamp is not mandatory but optional.
 	  
-	  HPCC++ algorithm today doesn't require Ingress Interface ID. P4.org INT defines Ingress
-	  and Egress Interface IDs as one metadata instruction. We keep the Ingress ID for a future use.
+	  P4.org INT defines Ingress and Egress Interface IDs as one metadata instruction.
+	  HPCC++ algorithm today doesn't require Ingress Interface ID. We mark Ingress Interface ID as a reserved field.
 </t>
 
 
