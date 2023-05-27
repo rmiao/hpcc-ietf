@@ -20,7 +20,7 @@
 <rfc
   xmlns:xi="http://www.w3.org/2001/XInclude"
   category="std"
-  docName="draft-miao-tsv-hpcc-00"
+  docName="draft-miao-tsv-hpcc-01"
   ipr="trust200902"
   obsoletes=""
   updates=""
@@ -175,6 +175,19 @@
           <country>USA</country>
         </postal>
         <email>jefftantsura@microsoft.com</email>
+      </address>
+    </author>
+           <author fullname="Guy Caspary" initials="G. " surname="Caspary">
+      <organization>Cisco Systems</organization>
+      <address>
+        <postal>
+          <street>Ofek 10 Building, 8 Hatochen Street</street>
+          <city>Caesarea Industrial Park</city>
+          <!-- <region>Washington</region> -->
+          <code>3079534</code>
+          <country>Israel</country>
+        </postal>
+        <email>gcaspary@cisco.com</email>
       </address>
     </author>
     
