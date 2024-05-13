@@ -418,7 +418,41 @@ easy to deploy in hardware, implementable with commodity NICs and switches.</t>
 
    </section>
 
-   
+  <section anchor = "sec-implementation-csig"
+	 title ="Inband telemetry on CSIG">
+     <figure anchor="fig-csig"
+               title="CSIG Compact Header Format">
+   <artwork><![CDATA[
+
+    0                   1                   2                   3
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |             TPID              |  T  |R|    S    |      LM     |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+   |0-15|  TPID  : IEEE allocated Tag Protocol ID for 4 Byte CSIG tag
+   |16-18| T     : Signal Type (0:min(ABW), 1: min(ABW/C), 2:max(PD))
+   |19|    R     : Reserved
+   |20-24| S     : Signal Value: Bucketed (32 configurable buckets)
+   |25-31| LM    : Locator Metadata of bottleneck device / port
+
+  ]]></artwork>
+          </figure>
+
+  <t>
+	  CSIG (Congestion SIGnaling) <xref target="I-D.ietf-ravi-ippm-csig"></xref> is a new
+	  compact in-band telemetry solution that carries a fixed-size aggregate metric computed
+	  over the hop devices. CSIG supports two formats: compact and expanded formats. 
+	  The expanded format is to be designed in IETF. This section discusses how to support HPCC++ 
+	  with the 2B compact format as shown in 
+	  
+	  <xref target="fig-csig"></xref> shows 
+
+	  
+</t>
+
+
+   </section>
 
 </section>
 
@@ -572,6 +606,20 @@ comments and helpful input to this specification. </t>
             <organization></organization>
           </author>
           <date month="February" year="2019" />
+        </front>
+      </reference>
+
+      <reference anchor="I-D.ietf-ravi-ippm-csig"
+		 target="https://datatracker.ietf.org/doc/draft-ravi-ippm-csig/">
+        <front>
+          <title>
+	    Congestion Signaling (CSIG)
+          </title>
+
+          <author >
+            <organization></organization>
+          </author>
+          <date month="February" year="2024" />
         </front>
       </reference>
 
