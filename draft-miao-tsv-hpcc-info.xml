@@ -418,7 +418,128 @@ easy to deploy in hardware, implementable with commodity NICs and switches.</t>
 
    </section>
 
-   
+  <section anchor = "sec-implementation-csig"
+	 title ="Inband telemetry on CSIG">
+     <figure anchor="fig-csig"
+               title="CSIG Compact Header Format">
+   <artwork><![CDATA[
+
+    0                   1                   2                   3
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |             TPID              |  T  |R|    S    |      LM     |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+   |0-15|  TPID  : IEEE allocated Tag Protocol ID for 4 Byte CSIG tag
+   |16-18| T     : Signal Type (0:min(ABW), 1: min(ABW/C), 2:max(PD))
+   |19|    R     : Reserved
+   |20-24| S     : Signal Value: Bucketed (32 configurable buckets)
+   |25-31| LM    : Locator Metadata of bottleneck device / port
+
+  ]]></artwork>
+          </figure>
+
+  <t>
+	  CSIG (Congestion SIGnaling) <xref target="I-D.ietf-ravi-ippm-csig"></xref> is a 
+	  compact in-band telemetry solution that carries a fixed-size aggregate metric computed
+	  over the hop devices. CSIG supports two formats: compact and expanded formats. 
+	  The expanded format is to be further defined in IETF. This section discusses how to support HPCC++ 
+	  with the 2B compact format as shown in <xref target="fig-csig"></xref>. 
+	  Note: there is no fundamental difference between the 2B format and the extended 6B format, 
+	  as both use Type-Value format, carrying one signal at a given packet.
+
+	  The Location Metadata (LM)field can encode link capacity and/or relative location of the bottleneck link 
+	  such as Clos stage and link orientation (up or down), from which one may look up the speed of the link.
+
+	  The Type-Value format of CSIG Signal allows the sender to choose one signal type of interest 
+	  for each packet to collect over the hop devices. CSIG draft today suggests 3 signal types:
+ 	 <!-- <t><list style="symbols"> -->
+ 	 <ul>	  
+	  <li> Minimum Available Bandwidth - min(ABW)
+	  <\li>
+	  <li> Maximum Link Utilization - min(ABW/B), where B is the link capacity
+	  <\li>
+	  <li> Maximum Per-Hop Delay - max(PD) 
+	  <\li>
+ 	 </ul>
+ 	 <!-- </list></t> -->
+
+   </t>
+
+	<section anchor = "sec-implementation-csig-how"
+	 title ="How to use CSIG for HPCC++">
+
+  	<t>	
+	In the HPCC++ algorithm, the per-hop normalized inflight bytes u’ in line 5 is a sum of two terms u1, u2 as follows:
+	</t>
+	
+	<figure><artwork><![CDATA[
+	u’ = u1 + u2, where
+	u1 = min(ack.L[i].qlen,L[i].qlen) / (ack.L[i].B*T)
+	u2 = txRate / ack.L[i].B
+	]]></artwork></figure>
+
+	<t>
+	u1 is essentially qlen divided by BDP and u2 is a link utilization. 
+	The min(current qlen, previous qlen) in u1 is for smoothing out noise and its benefit is marginal 
+	as described in the HPCC+ requirement section.
+
+	Compared to INT/IFA/IOAM discussed above that stack up multiple metadata from all hop devices in
+	each packet, CSIG carries only one signal (either u1 or u2) at a packet. 
+	We argue that’s acceptable for lossy networks as follows. 
+	(The case for lossless networks will be discussed in a later revision.)
+
+	In lossy networks not using PFC, queueing happens only when the link is 100% utilized. 
+	It’s easy to see that when u1 (qlen/BDP) is non-zero, u2 (link utilization) is 100%. 
+	Likewise, when u2 is less than 100%, u1 is zero. This mutual-exclusiveness between u1 and u2 
+	by definition makes CSIG, which carries only one signal (either for u1 or u2) at a packet, 
+	as a viable signaling mechanism for HPCC++. The sender of HPCC++ with CSIG can decide which 
+	of the two signals to collect from each packet based on its protocol state. 
+
+	Note that because u1’s qlen is an instantaneous value while u2’s link utilization is calculated
+	over a measurement time window, it is possible to momentarily have u1 > 0 and u2 < 100%.
+	In the case of HPCC++ with conventional INT/IFA/IOAM, the measurement window for 
+	link utilization is determined by the delta between current timestamp and previous timestamp
+	observed by each connection and the delta varies packet by packet. 
+	HPCC++ sums up u1 and u2 ignoring such a temporary incongruity. 
+	With CSIG, u2 is estimated by the switches
+	and the measurement window is a network-wide config parameter e.g., a multiple of the network RTT. 
+
+	When a path changes, triggered by either routing changes or by end-host driven path migration 
+	(such as PLB), two consecutive packets are assumed to go through the same path 
+	for the algorithm to have its inputs consistently - u1 and u2.
+
+	With CSIG, HPCC++ can optain max(u') by collecting max(u2) or max(u2) per packet as follows.
+
+	max(u2): the for-loop from line 3 of HPCC++ looks for the max(u1), 
+	and if there is no queueing happening throughout the path, it returns max(u2). 
+	max(u2)is equivalent to min(ABW/B) in CSIG, hence we can directly use min(ABW/B).
+
+	max(u1): in computing max(u1), one straightforward way is to introduce 
+	a new signal type of max(qlen/B) in CSIG. qlen/B can be interpreted as an ‘expected’ 
+	sojourn time for the packet in the tail. 
+	HPCC++ assumes ~100% of the link capacity B is used for HPCC++ traffic. 
+	max(qlen/B) is maximum per-hop ‘expected’ delay. 
+	Note that T (= congestion-free RTT) in u1 is a network-wide config parameter in HPCC++,
+	not specific to each hop. Once CSIG collects max(qlen/B), 
+	the end host can easily calculate u1 = max(qlen/B) / T for HPCC++.
+
+	Another way is to use the max(PD) signal in CSIG to approximate max(qlen/B). 
+	The reason why this is an approximation is in two folds: first, the per-hop delay in CSIG
+	is the delay experienced by the signal-carrying packet while qlen in HPCC++ is the 
+	length of the queue observed at the dequeue time of CSIG-carrying packet,
+	hence the effect of queueing applies to the packet at the tail, not to the packet carries the CSIG signal.
+	Second, B in qlen/B of HPCC++ is the whole link capacity while the per-hop delay
+	in CSIG reflects the per-queue drain rate affected by other traffic classes
+	depending on the queueing mechanism in use (strict priority or WDRR).
+
+	The smoothing effect of min(current qlen, previous qlen) in u1 can be supported by CSIG
+	as long as the bottleneck point doesn’t change between the previous packet and the current packet. 
+	</t>
+
+	</section>
+
+   </section>
 
 </section>
 
@@ -572,6 +693,20 @@ comments and helpful input to this specification. </t>
             <organization></organization>
           </author>
           <date month="February" year="2019" />
+        </front>
+      </reference>
+
+      <reference anchor="I-D.ietf-ravi-ippm-csig"
+		 target="https://datatracker.ietf.org/doc/draft-ravi-ippm-csig/">
+        <front>
+          <title>
+	    Congestion Signaling (CSIG)
+          </title>
+
+          <author >
+            <organization></organization>
+          </author>
+          <date month="February" year="2024" />
         </front>
       </reference>
 
