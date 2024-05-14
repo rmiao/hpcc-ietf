@@ -502,7 +502,7 @@ easy to deploy in hardware, implementable with commodity NICs and switches.</t>
 	link utilization is determined by the delta between current timestamp and previous timestamp
 	observed by each connection and the delta varies packet by packet. 
 	HPCC++ sums up u1 and u2 ignoring such a temporary incongruity. 
-	With CSIG, u2 is estimated by the switches (as further discussed below) 
+	With CSIG, u2 is estimated by the switches
 	and the measurement window is a network-wide config parameter e.g., a multiple of the network RTT. 
 
 	When a path changes, triggered by either routing changes or by end-host driven path migration 
@@ -521,7 +521,8 @@ easy to deploy in hardware, implementable with commodity NICs and switches.</t>
 	HPCC++ assumes ~100% of the link capacity B is used for HPCC++ traffic. 
 	max(qlen/B) is maximum per-hop ‘expected’ delay. 
 	Note that T (= congestion-free RTT) in u1 is a network-wide config parameter in HPCC++,
-	not specific to each hop. Once CSIG collects max(qlen/B), the end host can easily calculate u1 = max(qlen/B) / T for HPCC++.
+	not specific to each hop. Once CSIG collects max(qlen/B), 
+	the end host can easily calculate u1 = max(qlen/B) / T for HPCC++.
 
 	Another way is to use the max(PD) signal in CSIG to approximate max(qlen/B). 
 	The reason why this is an approximation is in two folds: first, the per-hop delay in CSIG
